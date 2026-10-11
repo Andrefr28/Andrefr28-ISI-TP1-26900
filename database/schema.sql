@@ -1,40 +1,41 @@
-CREATE TABLE IF NOT EXISTS voluntarios (
-    id_voluntario SERIAL PRIMARY KEY,
-    nome VARCHAR(120) NOT NULL,
-    telefone VARCHAR(20),
-    concelho VARCHAR(80) NOT NULL,
-    codigo_postal VARCHAR(8),
-    disponivel BOOLEAN NOT NULL DEFAULT TRUE,
-    capacidade_transporte_kg NUMERIC(8,2) NOT NULL CHECK (capacidade_transporte_kg > 0),
-    tipo_veiculo VARCHAR(80) NOT NULL,
-    possui_refrigeracao BOOLEAN NOT NULL DEFAULT FALSE,
-    disponibilidade_horaria VARCHAR(40),
-    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE IF NOT EXISTS airports (
+    airport_code VARCHAR(10) PRIMARY KEY,
+    airport_name VARCHAR(255) NOT NULL,
+    city VARCHAR(120),
+    country VARCHAR(120),
+    latitude NUMERIC(10, 6),
+    longitude NUMERIC(10, 6)
 );
 
-CREATE TABLE IF NOT EXISTS resultados_distribuicao (
-    id_resultado SERIAL PRIMARY KEY,
-    id_excedente VARCHAR(40) NOT NULL,
-    produto VARCHAR(120) NOT NULL,
-    categoria VARCHAR(80),
-    quantidade NUMERIC(10,2) NOT NULL CHECK (quantidade > 0),
-    unidade VARCHAR(20) NOT NULL,
-    data_validade DATE,
-    prioridade VARCHAR(30) NOT NULL,
-    instituicao_nome VARCHAR(160),
-    voluntario_id INTEGER REFERENCES voluntarios(id_voluntario),
-    estado VARCHAR(60) NOT NULL,
-    motivo VARCHAR(255),
-    codigo_postal_origem VARCHAR(8),
-    concelho_origem VARCHAR(80),
-    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE IF NOT EXISTS flights (
+    flight_id SERIAL PRIMARY KEY,
+    flight_date DATE NOT NULL,
+    airline_code VARCHAR(20),
+    airline_name VARCHAR(255),
+    origin_airport_code VARCHAR(10) REFERENCES airports(airport_code),
+    destination_airport_code VARCHAR(10),
+    scheduled_departure TIMESTAMP,
+    actual_departure TIMESTAMP,
+    departure_delay_minutes NUMERIC(8, 2),
+    is_delayed BOOLEAN
 );
 
-CREATE TABLE IF NOT EXISTS logs_etl (
-    id_log SERIAL PRIMARY KEY,
-    etapa VARCHAR(80) NOT NULL,
-    nivel VARCHAR(20) NOT NULL,
-    mensagem TEXT NOT NULL,
-    registos_processados INTEGER,
-    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE IF NOT EXISTS weather_hourly (
+    weather_id SERIAL PRIMARY KEY,
+    airport_code VARCHAR(10) REFERENCES airports(airport_code),
+    observed_at TIMESTAMP NOT NULL,
+    temperature_c NUMERIC(6, 2),
+    precipitation_mm NUMERIC(8, 2),
+    wind_speed_kmh NUMERIC(8, 2),
+    weather_code INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS etl_logs (
+    log_id SERIAL PRIMARY KEY,
+    process_name VARCHAR(120) NOT NULL,
+    source_name VARCHAR(120),
+    rows_processed INTEGER DEFAULT 0,
+    status VARCHAR(40) NOT NULL,
+    message TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
