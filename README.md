@@ -1,41 +1,56 @@
-# Food Rescue - ISI TP1 (2026/27)
+# Airport Intelligence - ISI TP1
 
-**Aluno:** Andre Rodrigues  
-**Unidade curricular:** Integracao de Sistemas de Informacao  
-**Tema:** Food Rescue - integracao de dados para apoio a redistribuicao de excedentes alimentares  
-**Plataforma principal:** KNIME  
-**Repositorio:** https://github.com/Andrefr28/ISI-TP1-26900
+Projeto academico de Integracao de Sistemas de Informacao.
 
 ## Objetivo
 
-Desenvolver um processo ETL que integre dados sobre excedentes alimentares, instituicoes, informacao geografica e voluntarios, para gerar propostas rastreaveis de distribuicao de alimentos.
+Desenvolver um processo ETL para integrar dados de voos, aeroportos e meteorologia, permitindo analisar indicadores de desempenho como total de voos, atrasos medios, percentagem de atrasos e possivel relacao com condicoes meteorologicas.
 
-O projeto pretende demonstrar:
+## Tema
 
-- recolha de dados a partir de fontes heterogeneas;
-- limpeza, validacao e normalizacao de dados;
-- cruzamento entre excedentes, instituicoes, localizacao e transporte;
-- persistencia dos resultados em PostgreSQL;
-- visualizacao de indicadores em Grafana.
+O estudo inicial foca-se nas partidas do aeroporto Hartsfield-Jackson Atlanta International Airport (ATL), durante janeiro de 2025.
 
-## Arquitetura prevista
+## Fontes previstas
 
-1. **Node-RED** simula a submissao de reports de excedentes alimentares.
-2. **MongoDB** guarda os reports em documentos JSON.
-3. **KNIME** centraliza o processo ETL.
-4. **GEO API PT** enriquece ou valida informacao geografica.
-5. **PostgreSQL** guarda voluntarios e resultados finais.
-6. **Grafana** apresenta indicadores do processo.
+- `flights.csv` - BTS TranStats, dados historicos de partidas.
+- `weather.json` - Open-Meteo API, meteorologia horaria.
+- `airports.xml` - OurAirports, cadastro de aeroportos.
 
-## Estrutura do repositorio
+## Ferramentas
 
-- `docs/` - enunciado e proposta final do projeto.
-- `workflows/` - workflows KNIME a desenvolver.
-- `relatorio/` - relatorio final do trabalho.
-- `dados/` - dados auxiliares, se forem necessarios durante a implementacao.
+- Node-RED - automatizacao de pedidos e recolha de dados.
+- MongoDB - armazenamento de dados raw em JSON.
+- KNIME - processo ETL: leitura, limpeza, validacao, transformacao e integracao.
+- PostgreSQL - armazenamento dos dados tratados.
+- Grafana - dashboard e indicadores.
 
-## Documento principal
+## Fluxo previsto
 
-A proposta final encontra-se em:
+```text
+Node-RED / ficheiros -> MongoDB -> KNIME -> PostgreSQL -> Grafana
+```
 
-`docs/Food_Rescue_Defesa_Proposta_final.html`
+## Estrutura
+
+- `dados/raw/` - ficheiros originais recolhidos.
+- `dados/processed/` - ficheiros tratados ou exportacoes intermédias.
+- `database/` - scripts SQL da base de dados.
+- `docs/` - plano, proposta e documentacao.
+- `node-red/` - flows e notas do Node-RED.
+- `workflows/` - workflows KNIME.
+- `relatorio/` - relatorio final.
+
+## Ambiente Docker
+
+Servicos previstos:
+
+- MongoDB: `localhost:27017`
+- PostgreSQL: `localhost:5432`
+- Node-RED: `http://localhost:1880`
+- Grafana: `http://localhost:3001`
+
+Comando para iniciar:
+
+```powershell
+docker compose up -d
+```

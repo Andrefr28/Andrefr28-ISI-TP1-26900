@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Airport Intelligence — Apresentação da Proposta</title>
+<style>
+:root{--bg:#09111f;--panel:#121e31;--panel2:#192941;--line:#2b3d56;--text:#f1f5fc;--muted:#b5c2d5;--mint:#68dfca;--blue:#9ac2ff;--amber:#ffd58a}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.5}
+.toolbar{position:sticky;top:0;z-index:5;background:#09111fee;backdrop-filter:blur(10px);display:flex;justify-content:center;gap:10px;padding:12px;border-bottom:1px solid var(--line)}button{background:#172941;border:1px solid #3a526f;color:var(--text);border-radius:9px;padding:10px 14px;font-weight:bold;cursor:pointer}button:hover{border-color:var(--mint)}
+.deck{max-width:1120px;margin:auto;padding:22px}.slide{position:relative;min-height:650px;margin-bottom:22px;padding:46px 48px;border:1px solid var(--line);border-radius:22px;background:radial-gradient(circle at 100% 0%,#1b3549 0,transparent 30%),linear-gradient(140deg,#121e31,#0d1727);display:flex;flex-direction:column;justify-content:center;overflow:hidden;break-after:page}
+.cover{background:radial-gradient(ellipse at 82% 16%,#265166 0,transparent 38%),linear-gradient(135deg,#172b43,#0b1423)}.eyebrow,.num{font-size:.82rem;font-weight:bold;letter-spacing:.15em;text-transform:uppercase;color:var(--mint)}h1{font-size:clamp(2.7rem,7vw,5.2rem);line-height:1.02;margin:15px 0}h2{font-size:clamp(1.8rem,4vw,2.65rem);line-height:1.12;margin:9px 0 20px}h3{font-size:1.08rem;margin:0 0 9px}.subtitle{font-size:1.2rem;color:var(--muted);max-width:790px}.lead{font-size:1.13rem;color:#e0e9f7;max-width:930px}.muted{color:var(--muted)}.mint{color:var(--mint)}.pills{display:flex;gap:9px;flex-wrap:wrap;margin-top:25px}.pill{border:1px solid #3a526c;border-radius:999px;padding:7px 12px;background:#14263a;color:#e1edfc;font-size:.88rem}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.cards.three{grid-template-columns:repeat(3,minmax(0,1fr))}.card{background:rgba(17,29,47,.96);border:1px solid var(--line);border-radius:15px;padding:18px}.card p{color:#d2deed;margin:7px 0}.card ul{padding-left:19px;margin:8px 0;color:#d2deed}.card li{margin:5px 0}.icon{width:40px;height:40px;display:grid;place-items:center;background:#183a43;color:var(--mint);border-radius:11px;font-size:1.25rem;margin-bottom:12px}.quote{background:#102b2b;border-left:4px solid var(--mint);border-radius:0 12px 12px 0;padding:15px 18px;font-size:1.1rem;margin:12px 0}.note{color:var(--amber);font-size:.88rem;margin-top:14px}.small{font-size:.86rem;color:var(--muted)}a{color:var(--blue);overflow-wrap:anywhere}.phases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.phase{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:17px}.phase .letter{font-size:2rem;font-weight:bold;color:var(--mint)}.phase p{color:#d2deed}.flow{display:flex;align-items:stretch;gap:9px;margin:18px 0}.flowbox{flex:1;text-align:center;padding:14px 8px;background:#14243a;border:1px solid var(--line);border-radius:12px}.flowbox b{display:block}.flowbox small{color:var(--muted)}.arrow{align-self:center;color:var(--mint);font-size:1.4rem}.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:620px;background:#111d30}th,td{text-align:left;padding:12px 13px;border-bottom:1px solid var(--line);vertical-align:top}th{background:#1b2b42;color:#e4efff}td{color:#d3deed}tr:last-child td{border:0}.faq{display:grid;grid-template-columns:1fr 1fr;gap:12px}.faq .card h3{color:var(--mint)}.foot{position:absolute;bottom:17px;left:48px;right:48px;display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:8px;color:#8191a8;font-size:.78rem}.center{text-align:center;align-items:center}.center .lead{margin:auto}.sources{font-size:.86rem}.sources li{margin:7px 0}
+@media(max-width:760px){.deck{padding:9px}.slide{min-height:0;padding:28px 21px;margin-bottom:12px;break-after:auto}.cards,.cards.three,.phases,.faq{grid-template-columns:1fr}.flow{flex-direction:column}.arrow{transform:rotate(90deg);align-self:center}.foot{position:static;margin-top:26px}.toolbar{position:static;flex-wrap:wrap}.subtitle{font-size:1.05rem}}
+@media print{body{background:white;color:#111}.toolbar{display:none}.deck{max-width:none;padding:0}.slide{min-height:96vh;margin:0;border:0;border-radius:0;background:white!important;color:#111;page-break-after:always;padding:35px}.slide:before{display:none}.card,.phase,.flowbox,table{background:white!important;border-color:#aaa}.card p,.card li,.muted,.subtitle,.lead,td,.small{color:#333}.pill{background:white;color:#222;border-color:#aaa}.foot{color:#555;border-color:#aaa}.quote{background:#f1f7f7;color:#111}.note{color:#744c00}a{color:#124e8a}}
+</style>
+</head>
+<body>
+<div class="toolbar">
+<button onclick="window.print()">Imprimir / Guardar como PDF</button>
+<button onclick="document.getElementById('slide1').scrollIntoView({behavior:'smooth'})">Início</button>
+<button onclick="document.getElementById('slide7').scrollIntoView({behavior:'smooth'})">Conclusão</button>
+</div>
+<main class="deck">
+<section class="slide cover" id="slide1">
+ <div class="eyebrow">Proposta de projeto · Integração de dados</div>
+ <h1>Airport<br><span class="mint">Intelligence</span></h1>
+ <p class="subtitle">Um processo ETL para integrar dados de voos, aeroportos e meteorologia e explorar indicadores de desempenho dos voos.</p>
+ <div class="pills"><span class="pill">3 ficheiros: CSV · JSON · XML</span><span class="pill">KNIME</span><span class="pill">PostgreSQL</span><span class="pill">Grafana</span></div>
+ <p class="muted" style="margin-top:34px">Proposta de trabalho académico · Âmbito, execução e tecnologias</p>
+ <div class="foot"><span>AIRPORT INTELLIGENCE</span><span>01 / 07</span></div>
+</section>
+
+<section class="slide" id="slide2">
+ <div class="num">01 · PROBLEMA</div><h2>Porque faz sentido este projeto?</h2>
+ <p class="lead">Os dados necessários para analisar o desempenho dos voos estão distribuídos por fontes diferentes, com estruturas e formatos distintos.</p>
+ <div class="cards three" style="margin-top:20px">
+  <div class="card"><div class="icon">✈</div><h3>Voos</h3><p>Contêm informação sobre a companhia, origem, destino, horários e atrasos, conforme os campos disponíveis.</p></div>
+  <div class="card"><div class="icon">⌖</div><h3>Aeroportos</h3><p>Permitem identificar cada aeroporto e conhecer a sua localização geográfica.</p></div>
+  <div class="card"><div class="icon">☁</div><h3>Meteorologia</h3><p>Acrescenta informação sobre as condições existentes num local e numa hora.</p></div>
+ </div>
+ <div class="quote"><strong>Problema a resolver:</strong> como reunir e uniformizar estes dados para conseguir analisá-los em conjunto, em vez de consultar cada fonte separadamente?</div>
+ <div class="foot"><span>PROBLEMA</span><span>02 / 07</span></div>
+</section>
+
+<section class="slide" id="slide3">
+ <div class="num">02 · OBJETIVO</div><h2>O que pretendo alcançar?</h2>
+ <div class="quote"><strong>Objetivo principal</strong><br>Desenvolver um processo ETL que leia três ficheiros de formatos diferentes, trate e relacione os dados, carregue-os numa base de dados e apresente os resultados num dashboard.</div>
+ <div class="cards">
+  <div class="card"><h3>Objetivos específicos</h3><ul><li>Recolher os dados necessários a partir de fontes públicas.</li><li>Uniformizar datas, tipos de dados e códigos de aeroportos.</li><li>Tratar valores em falta e registos duplicados.</li><li>Relacionar voos, aeroportos e meteorologia quando existir correspondência.</li><li>Carregar os dados tratados no PostgreSQL.</li></ul></div>
+  <div class="card"><h3>O que quero conseguir analisar</h3><ul><li>Número total de voos incluídos no conjunto de dados.</li><li>Atraso médio e percentagem de voos atrasados, se os campos permitirem.</li><li>Comparação por companhia aérea e aeroporto.</li><li>Evolução dos atrasos ao longo do período selecionado.</li><li>Possível associação entre condições meteorológicas e atrasos.</li></ul></div>
+ </div>
+ <p class="note">O âmbito inicial será limitado às partidas de Atlanta (ATL) durante janeiro de 2025. O ficheiro de aeroportos incluirá ATL e os destinos identificados nos voos; a meteorologia será recolhida inicialmente para Atlanta.</p>
+ <div class="foot"><span>OBJETIVO</span><span>03 / 07</span></div>
+</section>
+
+<section class="slide" id="slide4">
+ <div class="num">03 · EXEMPLO PRÁTICO E FICHEIROS</div><h2>Exemplo: partidas do aeroporto de Atlanta</h2>
+ <p class="lead">Para tornar o projeto exequível, o primeiro estudo será limitado a um aeroporto de origem e a um mês de dados históricos.</p>
+ <div class="cards">
+  <div class="card"><div class="icon">✈</div><h3>Aeroporto escolhido</h3><p><strong>Hartsfield-Jackson Atlanta International Airport (ATL)</strong>, nos Estados Unidos.</p><p>Na página BTS “Detailed Statistics Departures”, seleciono ATL como <em>Origin Airport</em>, janeiro em <em>Month(s)</em>, <strong>All Days</strong> e o ano <strong>2025</strong>. Em <em>Statistics</em>, seleciono <strong>All Statistics</strong>.</p><p class="small">Se a opção “All Airlines” não estiver disponível, seleciono uma companhia e confirmo as opções disponíveis antes de submeter.</p></div>
+  <div class="card"><div class="icon">◎</div><h3>Âmbito do exemplo</h3><p>O ficheiro de voos terá partidas de Atlanta durante janeiro de 2025. O filtro de origem não recolhe todas as chegadas a Atlanta: inclui os voos que partem deste aeroporto.</p><p>O objetivo inicial é demonstrar o processo ETL com um volume limitado de dados, antes de alargar a outros aeroportos.</p></div>
+ </div>
+ <div class="cards three" style="margin-top:14px">
+  <div class="card"><span class="pill">FICHEIRO 1 · CSV</span><h3 style="margin-top:12px">flights.csv</h3><p>Partidas de ATL: companhia, destino, data, horários e atraso, conforme os campos disponibilizados pelo BTS.</p><a href="https://www.transtats.bts.gov/ontime/Departures.aspx" target="_blank" rel="noopener">Página de partidas BTS ↗</a></div>
+  <div class="card"><span class="pill">FICHEIRO 2 · JSON</span><h3 style="margin-top:12px">weather.json</h3><p>Dados meteorológicos horários para as coordenadas de Atlanta, durante janeiro de 2025. Inicialmente, analisaremos as condições no aeroporto de origem.</p><a href="https://open-meteo.com/en/docs/historical-weather-api" target="_blank" rel="noopener">Open-Meteo ↗</a></div>
+  <div class="card"><span class="pill">FICHEIRO 3 · XML</span><h3 style="margin-top:12px">airports.xml</h3><p>Cadastro de ATL e dos aeroportos de destino presentes em flights.csv: códigos, nomes, países e coordenadas quando disponíveis.</p><a href="https://ourairports.com/data/" target="_blank" rel="noopener">OurAirports ↗</a></div>
+ </div>
+ <div class="quote"><strong>Como se relacionam?</strong> O código ATL identifica o aeroporto de origem e permite associar os voos às coordenadas de Atlanta. A meteorologia será associada por data/hora, tendo em conta o fuso horário. Os aeroportos de destino serão identificados através dos códigos presentes nos voos.</div>
+ <p class="note">Limitação: esta primeira versão analisa a meteorologia em Atlanta, não nos destinos. Além disso, uma associação entre mau tempo e atrasos não prova causalidade. O ficheiro XML será convertido a partir dos dados públicos de OurAirports.</p>
+ <div class="foot"><span>EXEMPLO DE EXTRAÇÃO</span><span>04 / 07</span></div>
+</section>
+
+<section class="slide" id="slide5">
+ <div class="num">04 · EXTRAÇÃO E TRATAMENTO</div><h2>Como vou executar o ETL?</h2>
+ <div class="phases">
+  <div class="phase"><div class="letter">E</div><h3>Extração</h3><p>1. Descarregar um período limitado de voos históricos.</p><p>2. Obter os aeroportos relevantes e convertê-los para XML.</p><p>3. Consultar a API meteorológica e guardar a resposta JSON.</p><p>4. Registar as fontes, o período e os campos obtidos.</p></div>
+  <div class="phase"><div class="letter">T</div><h3>Tratamento</h3><p>1. Ler CSV, JSON e XML no KNIME.</p><p>2. Uniformizar nomes, datas, horas e tipos de dados.</p><p>3. Tratar valores em falta e duplicados.</p><p>4. Validar códigos e relacionar os conjuntos de dados.</p><p>5. Calcular indicadores de atraso quando possível.</p></div>
+  <div class="phase"><div class="letter">L</div><h3>Loading / Carregamento</h3><p>1. Criar a base de dados e as tabelas no PostgreSQL.</p><p>2. Carregar os dados tratados pelo KNIME.</p><p>3. Verificar contagens, chaves e registos sem correspondência.</p><p>4. Comparar resultados com consultas SQL de validação.</p></div>
+ </div>
+ <h3 style="margin-top:22px">Fluxo previsto</h3>
+ <div class="flow"><div class="flowbox"><b>3 ficheiros</b><small>CSV · JSON · XML</small></div><div class="arrow">→</div><div class="flowbox"><b>KNIME</b><small>Limpeza e integração</small></div><div class="arrow">→</div><div class="flowbox"><b>PostgreSQL</b><small>Dados estruturados</small></div><div class="arrow">→</div><div class="flowbox"><b>Grafana</b><small>Dashboard</small></div></div>
+ <div class="foot"><span>METODOLOGIA ETL</span><span>05 / 07</span></div>
+</section>
+
+<section class="slide" id="slide6">
+ <div class="num">05 · TECNOLOGIAS E RESULTADO</div><h2>Que ferramentas vou utilizar?</h2>
+ <div class="tablewrap">
+ <table><thead><tr><th>Fase</th><th>Ferramenta</th><th>Utilização</th></tr></thead><tbody>
+ <tr><td>Extração</td><td>BTS TranStats</td><td>Obter os dados históricos dos voos.</td></tr>
+ <tr><td>Extração</td><td>OurAirports + conversão</td><td>Obter dados dos aeroportos e preparar o ficheiro XML.</td></tr>
+ <tr><td>Extração</td><td>Open-Meteo API</td><td>Recolher dados meteorológicos e guardar a resposta JSON.</td></tr>
+ <tr><td>Automatização opcional</td><td>Node-RED</td><td>Fazer o pedido HTTP e guardar a resposta da API. Se necessário, a recolha inicial pode ser manual.</td></tr>
+ <tr><td>Tratamento</td><td>KNIME Analytics Platform</td><td>Ler os três formatos, limpar, transformar e relacionar os dados.</td></tr>
+ <tr><td>Loading</td><td>PostgreSQL</td><td>Guardar os dados tratados em tabelas relacionais.</td></tr>
+ <tr><td>Visualização</td><td>Grafana</td><td>Consultar a base de dados e apresentar indicadores em gráficos.</td></tr>
+ </tbody></table></div>
+ <div class="cards" style="margin-top:16px">
+  <div class="card"><h3>Estrutura inicial da base de dados</h3><p><code>airports</code> — códigos e localização.</p><p><code>flights</code> — horários e informação dos voos.</p><p><code>weather_hourly</code> — condições meteorológicas por local e hora.</p></div>
+  <div class="card"><h3>Dashboard previsto</h3><p>Total de voos, atraso médio, percentagem de atrasos, comparação por companhia/aeroporto e evolução temporal. A análise meteorológica será incluída se a correspondência dos dados for fiável.</p></div>
+ </div>
+ <div class="foot"><span>TECNOLOGIAS</span><span>06 / 07</span></div>
+</section>
+
+<section class="slide" id="slide7">
+ <div class="num">06 · VIABILIDADE E CONCLUSÃO</div><h2>Porque é um projeto atingível?</h2>
+ <div class="cards">
+  <div class="card"><h3>Âmbito controlado</h3><ul><li>Começar com um mês de dados e poucos aeroportos.</li><li>Validar os ficheiros antes de construir todo o workflow.</li><li>Fazer primeiro uma integração básica e acrescentar a meteorologia depois.</li><li>Usar ferramentas adequadas a cada fase, sem desenvolver uma aplicação de raiz.</li></ul></div>
+  <div class="card"><h3>Como vou validar o trabalho?</h3><ul><li>Confirmar que os três ficheiros são lidos corretamente.</li><li>Verificar tipos, valores em falta e duplicados.</li><li>Medir quantos voos conseguem ser associados a aeroportos e meteorologia.</li><li>Comparar os indicadores do dashboard com consultas SQL.</li></ul></div>
+ </div>
+ <div class="quote"><strong>Conclusão:</strong> o projeto demonstra, de ponta a ponta, como dados heterogéneos podem ser extraídos, tratados, integrados e carregados para apoiar a análise do desempenho dos voos.</div>
+ <p class="lead">O primeiro passo será validar o ficheiro de voos e selecionar um período compatível com os restantes dados. Só depois fecharei o modelo de dados e os indicadores finais.</p>
+ <p class="note">Limitação a reconhecer: uma associação entre meteorologia e atrasos não prova que o tempo seja a causa do atraso. O projeto procura explorar padrões, não demonstrar causalidade.</p>
+ <div class="foot"><span>CONCLUSÃO</span><span>07 / 07</span></div>
+</section>
+</main>
+</body>
+</html>
