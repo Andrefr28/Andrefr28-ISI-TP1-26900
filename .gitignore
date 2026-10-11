@@ -1,28 +1,23 @@
-﻿# KNIME
-*.knwf.lock
-.metadata/
-workspace/
+# Local agent/tool state
+.omo/
+.playwright-mcp/
 
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
-.venv/
-venv/
-
-# OS
+# OS / IDE
 .DS_Store
 Thumbs.db
-
-# IDE
 .vscode/
 .idea/
 
-# OpenCode / agent local state
-.omo/
-
-# Temporary
-*.tmp
+# Logs and temporary files
 *.log
+*.tmp
 
-.playwright-mcp/
+# KNIME local metadata/cache
+*.knimeLock
+.metadata/
+
+# Python helper scripts/cache, if used later
+__pycache__/
+*.pyc
+.venv/
+venv/
