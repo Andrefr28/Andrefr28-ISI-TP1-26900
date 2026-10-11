@@ -1,33 +1,46 @@
 services:
   mongodb:
     image: mongo:7
-    container_name: food_rescue_mongodb
+    container_name: airport_intelligence_mongodb
     restart: unless-stopped
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: foodrescue
-      MONGO_INITDB_ROOT_PASSWORD: foodrescue123
-      MONGO_INITDB_DATABASE: food_rescue
+      MONGO_INITDB_ROOT_USERNAME: airport
+      MONGO_INITDB_ROOT_PASSWORD: airport123
+      MONGO_INITDB_DATABASE: airport_intelligence
     volumes:
       - mongodb_data:/data/db
 
   postgres:
     image: postgres:16
-    container_name: food_rescue_postgres
+    container_name: airport_intelligence_postgres
     restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: food_rescue
-      POSTGRES_USER: foodrescue
-      POSTGRES_PASSWORD: foodrescue123
+      POSTGRES_DB: airport_intelligence
+      POSTGRES_USER: airport
+      POSTGRES_PASSWORD: airport123
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  nodered:
+    image: nodered/node-red:latest
+    container_name: airport_intelligence_nodered
+    restart: unless-stopped
+    ports:
+      - "1880:1880"
+    environment:
+      TZ: Europe/Lisbon
+    volumes:
+      - nodered_data:/data
+    depends_on:
+      - mongodb
+
   grafana:
     image: grafana/grafana:11.5.2
-    container_name: food_rescue_grafana
+    container_name: airport_intelligence_grafana
     restart: unless-stopped
     ports:
       - "3001:3000"
@@ -42,4 +55,5 @@ services:
 volumes:
   mongodb_data:
   postgres_data:
+  nodered_data:
   grafana_data:

@@ -1,7 +1,9 @@
-﻿# Node-RED - Fluxo de simulacao
+# Node-RED
 
-Este fluxo serve para simular a rececao de reports de excedentes alimentares.
+Esta pasta ira guardar flows do Node-RED para automatizar pedidos HTTP, como a recolha de dados meteorologicos da Open-Meteo API, e para guardar respostas raw no MongoDB.
 
-Importar o ficheiro flow_excedentes.json no Node-RED (Import -> Clipboard).
+URL local depois de iniciar Docker:
 
-Para guardar no MongoDB, podemos usar o node mongodb out ligado ao payload gerado.
+```text
+http://localhost:1880
+```
