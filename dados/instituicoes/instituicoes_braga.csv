@@ -1,8 +1,0 @@
-﻿id_instituicao,nome,concelho,endereco,codigo_postal,aceita_frio,aceita_congelado,capacidade_beneficiarios_dia
-INS001,Centro Social de Braga,Braga,Centro da Cidade,4700-001,Sim,Sim,120
-INS002,Instituicao de Solidariedade Famalicao,Famalicao,Praca Central,4760-001,Sim,Sim,80
-INS003,Centro Apoio Guimaraes,Guimaraes,Rua Antiga,4800-001,Sim,Sim,90
-INS004,Apoio Barcelos,Barcelos,Rua Nova,4750-001,Sim,Sim,60
-INS005,Centro Social Amares,Amares,Rua Central,4720-001,Sim,Sim,50
-INS006,Instituicao Esposende,Esposende,Rua da Praia,4740-001,Sim,Sim,40
-INS007,Centro Apoio Vila Verde,Vila Verde,Rua Velha,4730-001,Sim,Sim,70
