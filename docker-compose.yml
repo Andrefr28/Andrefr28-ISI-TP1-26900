@@ -4,7 +4,8 @@ services:
     container_name: airport_intelligence_mongodb
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      # 27017 no host pertence ao mongod local do Windows -> publica-se em 27018.
+      - "27018:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: airport
       MONGO_INITDB_ROOT_PASSWORD: airport123
@@ -17,7 +18,8 @@ services:
     container_name: airport_intelligence_postgres
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      # 5432 no host pertence ao postgres local do Windows -> publica-se em 5433.
+      - "5433:5432"
     environment:
       POSTGRES_DB: airport_intelligence
       POSTGRES_USER: airport
@@ -34,7 +36,7 @@ services:
     environment:
       TZ: Europe/Lisbon
     volumes:
-      - nodered_data:/data
+      - ./node-red/data:/data
     depends_on:
       - mongodb
 
@@ -55,5 +57,4 @@ services:
 volumes:
   mongodb_data:
   postgres_data:
-  nodered_data:
   grafana_data:
