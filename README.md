@@ -44,8 +44,10 @@ Node-RED / ficheiros -> MongoDB -> KNIME -> PostgreSQL -> Grafana
 
 Servicos previstos:
 
-- MongoDB: `localhost:27017`
-- PostgreSQL: `localhost:5432`
+- MongoDB: `localhost:27018` (as portas `27017`/`5432` do host estao ocupadas por
+  servicos MongoDB/PostgreSQL nativos instalados no Windows; os contentores
+  publicam portas alternativas, sem alterar as ligacoes internas).
+- PostgreSQL: `localhost:5433`
 - Node-RED: `http://localhost:1880`
 - Grafana: `http://localhost:3001`
 
