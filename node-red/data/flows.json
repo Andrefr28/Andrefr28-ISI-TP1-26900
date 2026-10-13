@@ -1,0 +1,184 @@
+[
+    {
+        "id": "f1a0000000000001",
+        "type": "tab",
+        "label": "ETL · Meteorologia (Open-Meteo)",
+        "disabled": false,
+        "info": "Flow 1 do projeto Airport Intelligence - Integracao de Sistemas de Informacao.\n\nObjetivo: extrair a meteorologia horaria de Atlanta (ATL) para o periodo 2025-01-01 a 2025-01-31 a partir da API Open-Meteo (endpoint /v1/archive) e guardar um documento por hora na collection 'weather_raw' do MongoDB.\n\nFonte: https://archive-api.open-meteo.com/v1/archive\nTimezone: America/New_York (hora local de ATL, para coincidir com os horarios locais dos voos do BTS).\n\nIdempotencia: antes de inserir, o flow limpa os documentos de ATL em weather_raw (deleteMany), pelo que cada execucao deixa exatamente 744 documentos (31 dias x 24 horas), sem duplicados."
+    },
+    {
+        "id": "f1a0000000000020",
+        "type": "mongodb4-client",
+        "name": "MongoDB Airport Intelligence",
+        "protocol": "mongodb",
+        "hostname": "mongodb",
+        "port": "27017",
+        "dbName": "airport_intelligence",
+        "appName": "",
+        "authSource": "",
+        "authMechanism": "DEFAULT",
+        "tls": false,
+        "tlsCAFile": "",
+        "tlsCertificateKeyFile": "",
+        "tlsInsecure": false,
+        "connectTimeoutMS": "30000",
+        "socketTimeoutMS": "0",
+        "minPoolSize": "0",
+        "maxPoolSize": "100",
+        "maxIdleTimeMS": "0",
+        "uri": "mongodb://airport:airport123@mongodb:27017/?authSource=admin",
+        "advanced": "{}",
+        "uriTabActive": "tab-uri-advanced"
+    },
+    {
+        "id": "f1a0000000000002",
+        "type": "comment",
+        "z": "f1a0000000000001",
+        "name": "Flow 1 - Meteorologia: Open-Meteo -> MongoDB (weather_raw)",
+        "info": "Clica em 'Extrair meteorologia (1 click)' para correr.\n\nPassos:\n1. inject (manual)\n2. function 'Limpar weather_raw (ATL)' -> prepara o filtro de limpeza\n3. mongodb4 'deleteMany weather_raw (ATL)' -> apaga os docs antigos de ATL (idempotencia)\n4. http request -> GET Open-Meteo archive (ATL, mes de jan 2025)\n5. function 'Achatar horas -> documentos' -> achata o array 'hourly' em N documentos (1 por hora)\n6. mongodb4 'insertMany -> weather_raw' -> insere os documentos\n7. debug -> mostra o resultado da insercao (insertedCount)\n\nResultado esperado: sempre 744 documentos em weather_raw.",
+        "x": 300,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "f1a0000000000010",
+        "type": "inject",
+        "z": "f1a0000000000001",
+        "name": "Extrair meteorologia (1 click)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 160,
+        "wires": [
+            [
+                "f1a0000000000015"
+            ]
+        ]
+    },
+    {
+        "id": "f1a0000000000015",
+        "type": "function",
+        "z": "f1a0000000000001",
+        "name": "Limpar weather_raw (ATL)",
+        "func": "// Passo de idempotencia: prepara o filtro para apagar os documentos\n// de ATL em weather_raw antes de recarregar. Assim cada execucao\n// deixa exatamente 744 documentos, sem duplicados.\nmsg.payload = [{ airport_code: \"ATL\" }]; // filtro do deleteMany\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 220,
+        "y": 220,
+        "wires": [
+            [
+                "f1a0000000000016"
+            ]
+        ]
+    },
+    {
+        "id": "f1a0000000000016",
+        "type": "mongodb4",
+        "z": "f1a0000000000001",
+        "clientNode": "f1a0000000000020",
+        "mode": "collection",
+        "collection": "weather_raw",
+        "operation": "deleteMany",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "deleteMany weather_raw (ATL)",
+        "x": 310,
+        "y": 280,
+        "wires": [
+            [
+                "f1a0000000000011"
+            ]
+        ]
+    },
+    {
+        "id": "f1a0000000000011",
+        "type": "http request",
+        "z": "f1a0000000000001",
+        "name": "Open-Meteo archive (ATL)",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=33.6367&longitude=-84.4281&start_date=2025-01-01&end_date=2025-01-31&hourly=temperature_2m,precipitation,wind_speed_10m,weather_code&timezone=America%2FNew_York",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 480,
+        "y": 340,
+        "wires": [
+            [
+                "f1a0000000000012"
+            ]
+        ]
+    },
+    {
+        "id": "f1a0000000000012",
+        "type": "function",
+        "z": "f1a0000000000001",
+        "name": "Achatar horas -> documentos",
+        "func": "// Transforma a resposta da Open-Meteo (arrays paralelos) em 1 documento por hora.\n// observed_at fica em hora LOCAL de Atlanta (America/New_York), sem conversao,\n// para permitir join direto com os horarios locais do BTS.\n\nconst data = msg.payload;\n\nif (!data || !data.hourly || !Array.isArray(data.hourly.time)) {\n    node.error(\"Resposta inesperada da Open-Meteo\", msg);\n    return null;\n}\n\nfunction naiveIso(t) {\n    if (t.length === 13) return t + \":00:00\"; // ex.: 2025-01-01T00\n    if (t.length === 16) return t + \":00\";    // ex.: 2025-01-01T00:00\n    return t;\n}\n\nconst h = data.hourly;\nconst ingestedAt = new Date().toISOString();\nconst docs = h.time.map(function (t, i) {\n    return {\n        source: \"open_meteo\",\n        airport_code: \"ATL\",\n        observed_at: naiveIso(t),\n        temperature_c: h.temperature_2m ? h.temperature_2m[i] : null,\n        precipitation_mm: h.precipitation ? h.precipitation[i] : null,\n        wind_speed_kmh: h.wind_speed_10m ? h.wind_speed_10m[i] : null,\n        weather_code: h.weather_code ? h.weather_code[i] : null,\n        latitude: data.latitude,\n        longitude: data.longitude,\n        timezone: data.timezone,\n        utc_offset_seconds: data.utc_offset_seconds,\n        ingested_at: ingestedAt\n    };\n});\n\nmsg.count = docs.length;\nmsg.payload = [ docs ]; // array passado como argumento do insertMany\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 400,
+        "wires": [
+            [
+                "f1a0000000000013"
+            ]
+        ]
+    },
+    {
+        "id": "f1a0000000000013",
+        "type": "mongodb4",
+        "z": "f1a0000000000001",
+        "clientNode": "f1a0000000000020",
+        "mode": "collection",
+        "collection": "weather_raw",
+        "operation": "insertMany",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "insertMany -> weather_raw",
+        "x": 820,
+        "y": 460,
+        "wires": [
+            [
+                "f1a0000000000014"
+            ]
+        ]
+    },
+    {
+        "id": "f1a0000000000014",
+        "type": "debug",
+        "z": "f1a0000000000001",
+        "name": "Resultado (insertedCount)",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 990,
+        "y": 520,
+        "wires": []
+    }
+]
