@@ -4,6 +4,7 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
-        "node-red-contrib-mongodb4": "3.4.0"
+        "node-red-contrib-mongodb4": "3.4.0",
+        "node-red-contrib-zip": "^1.1.0"
     }
 }

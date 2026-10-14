@@ -35,6 +35,8 @@ services:
       - "1880:1880"
     environment:
       TZ: Europe/Lisbon
+      # O CSV do BTS descomprimido (~232 MB) e processado em memoria: sobe-se o heap.
+      NODE_OPTIONS: --max-old-space-size=4096
     volumes:
       - ./node-red/data:/data
     depends_on:
