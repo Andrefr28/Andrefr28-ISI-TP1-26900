@@ -4,7 +4,21 @@
         "type": "tab",
         "label": "ETL · Meteorologia (Open-Meteo)",
         "disabled": false,
-        "info": "Flow 1 do projeto Airport Intelligence - Integracao de Sistemas de Informacao.\n\nObjetivo: extrair a meteorologia horaria de Atlanta (ATL) para o periodo 2025-01-01 a 2025-01-31 a partir da API Open-Meteo (endpoint /v1/archive) e guardar um documento por hora na collection 'weather_raw' do MongoDB.\n\nFonte: https://archive-api.open-meteo.com/v1/archive\nTimezone: America/New_York (hora local de ATL, para coincidir com os horarios locais dos voos do BTS).\n\nIdempotencia: antes de inserir, o flow limpa os documentos de ATL em weather_raw (deleteMany), pelo que cada execucao deixa exatamente 744 documentos (31 dias x 24 horas), sem duplicados."
+        "info": "Meteorologia (Open-Meteo, JSON). Camada RAW: apenas weather_raw_original (payload original). Transformacao no KNIME."
+    },
+    {
+        "id": "f3a0000000000001",
+        "type": "tab",
+        "label": "ETL · Voos (BTS TranStats)",
+        "disabled": false,
+        "info": "Flow 3 do projeto Airport Intelligence - Integracao de Sistemas de Informacao.\n\nObjetivo: extrair as partidas de ATL (Origin = ATL) em janeiro de 2025 a partir\ndo ficheiro mensal pre-zipado do BTS TranStats (On-Time Performance) e guardar\no CSV filtrado em flights_raw (1 documento, < 16 MB).\n\nFonte: https://transtats.bts.gov/PREZIP/On_Time_Reporting_Carrier_On_Time_Performance_1987_present_2025_1.zip\nFiltro: Origin = ATL e FlightDate dentro de 2025-01.\n\nIdempotencia: upsert pela chave natural (source+dataset+airport_code+month) ->\nexatamente 1 documento, sem duplicados. Nao se apaga antes de confirmar sucesso.\nEm falha de rede, o download e repetido ate 5 vezes (30 s de espera)."
+    },
+    {
+        "id": "f2a0000000000001",
+        "type": "tab",
+        "label": "ETL · Aeroportos (OurAirports)",
+        "disabled": false,
+        "info": "Flow 2 do projeto Airport Intelligence - Integracao de Sistemas de Informacao.\n\nObjetivo: extrair o cadastro de aeroportos do OurAirports (CSV) e converter para\nXML no proprio Node-RED (conversao explicita CSV -> XML, documentada).\n\nFonte: https://davidmegginson.github.io/ourairports-data/airports.csv\nNota: a fonte disponibiliza CSV; o XML e gerado por nos (nao vem da fonte).\n\nCadeia:\ninject -> Preparar pedido -> http -> Validar resposta -> CSV -> registos\n-> registos -> XML -> Guardar XML (ficheiro /data/raw/airports.xml)\n-> Metadados -> updateOne airports_raw_meta -> debug\n\nArmazenamento: o XML completo tem ~56 MiB, acima do limite de 16 MiB por\ndocumento MongoDB, pelo que fica em ficheiro; no MongoDB guardamos os metadados\n(contagem, colunas, bytes, caminho). O conjunto completo e mantido; a selecao\nde aeroportos fica para o KNIME."
     },
     {
         "id": "f1a0000000000020",
@@ -34,8 +48,8 @@
         "id": "f1a0000000000002",
         "type": "comment",
         "z": "f1a0000000000001",
-        "name": "Flow 1 - Meteorologia: Open-Meteo -> MongoDB (weather_raw)",
-        "info": "Clica em 'Extrair meteorologia (1 click)' para correr.\n\nPassos:\n1. inject (manual)\n2. function 'Limpar weather_raw (ATL)' -> prepara o filtro de limpeza\n3. mongodb4 'deleteMany weather_raw (ATL)' -> apaga os docs antigos de ATL (idempotencia)\n4. http request -> GET Open-Meteo archive (ATL, mes de jan 2025)\n5. function 'Achatar horas -> documentos' -> achata o array 'hourly' em N documentos (1 por hora)\n6. mongodb4 'insertMany -> weather_raw' -> insere os documentos\n7. debug -> mostra o resultado da insercao (insertedCount)\n\nResultado esperado: sempre 744 documentos em weather_raw.",
+        "name": "Flow 1 - Meteorologia: Open-Meteo -> MongoDB (weather_raw_original)",
+        "info": "Clica em 'Extrair meteorologia (1 click)' para correr.\n\nCamada RAW: guarda SO a resposta original da Open-Meteo, sem transformar.\nA transformacao (achatar em 1 linha por hora) fica para o KNIME.\n\nPassos:\n1. inject (manual)\n2. function 'Preparar recolha (ATL)' -> cria extraction_id + batch_ts\n3. http request -> GET Open-Meteo archive (ATL, jan 2025)\n4. function 'Validar resposta' -> aborta sem alterar nada se a resposta for invalida\n5. function 'Preparar original (JSON)' -> updateOne weather_raw_original (upsert = 1 doc por recolha)\n6. debug -> mostra o resultado do upsert\n\nResultado esperado: 1 documento em weather_raw_original (resposta JSON original, 744 horas).",
         "x": 300,
         "y": 60,
         "wires": []
@@ -69,8 +83,8 @@
         "id": "f1a0000000000015",
         "type": "function",
         "z": "f1a0000000000001",
-        "name": "Limpar weather_raw (ATL)",
-        "func": "// Passo de idempotencia: prepara o filtro para apagar os documentos\n// de ATL em weather_raw antes de recarregar. Assim cada execucao\n// deixa exatamente 744 documentos, sem duplicados.\nmsg.payload = [{ airport_code: \"ATL\" }]; // filtro do deleteMany\nreturn msg;\n",
+        "name": "Preparar recolha (ATL)",
+        "func": "// Passo de preparacao (idempotencia SEM apagar dados):\n// identifica a recolha com uma chave natural e um marcador unico de execucao.\n// A limpeza das recolhas antigas acontece SO no fim, depois de confirmar\n// que os novos dados foram guardados.\nmsg.extraction_id = \"open_meteo_ATL_2025-01\";\nmsg.batch_ts = new Date().toISOString();\nmsg.meta = {\n    source: \"open_meteo\",\n    airport_code: \"ATL\",\n    period: { start: \"2025-01-01\", end: \"2025-01-31\" },\n    format: \"json\",\n    endpoint: \"https://archive-api.open-meteo.com/v1/archive\",\n    extracted_at: msg.batch_ts\n};\nreturn msg;\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -78,26 +92,6 @@
         "libs": [],
         "x": 220,
         "y": 220,
-        "wires": [
-            [
-                "f1a0000000000016"
-            ]
-        ]
-    },
-    {
-        "id": "f1a0000000000016",
-        "type": "mongodb4",
-        "z": "f1a0000000000001",
-        "clientNode": "f1a0000000000020",
-        "mode": "collection",
-        "collection": "weather_raw",
-        "operation": "deleteMany",
-        "output": "toArray",
-        "maxTimeMS": "0",
-        "handleDocId": false,
-        "name": "deleteMany weather_raw (ATL)",
-        "x": 310,
-        "y": 280,
         "wires": [
             [
                 "f1a0000000000011"
@@ -117,58 +111,77 @@
         "persist": false,
         "proxy": "",
         "authType": "",
-        "x": 480,
-        "y": 340,
+        "x": 440,
+        "y": 200,
         "wires": [
             [
-                "f1a0000000000012"
+                "f1a0000000000017"
             ]
         ]
     },
     {
-        "id": "f1a0000000000012",
+        "id": "f1a0000000000017",
         "type": "function",
         "z": "f1a0000000000001",
-        "name": "Achatar horas -> documentos",
-        "func": "// Transforma a resposta da Open-Meteo (arrays paralelos) em 1 documento por hora.\n// observed_at fica em hora LOCAL de Atlanta (America/New_York), sem conversao,\n// para permitir join direto com os horarios locais do BTS.\n\nconst data = msg.payload;\n\nif (!data || !data.hourly || !Array.isArray(data.hourly.time)) {\n    node.error(\"Resposta inesperada da Open-Meteo\", msg);\n    return null;\n}\n\nfunction naiveIso(t) {\n    if (t.length === 13) return t + \":00:00\"; // ex.: 2025-01-01T00\n    if (t.length === 16) return t + \":00\";    // ex.: 2025-01-01T00:00\n    return t;\n}\n\nconst h = data.hourly;\nconst ingestedAt = new Date().toISOString();\nconst docs = h.time.map(function (t, i) {\n    return {\n        source: \"open_meteo\",\n        airport_code: \"ATL\",\n        observed_at: naiveIso(t),\n        temperature_c: h.temperature_2m ? h.temperature_2m[i] : null,\n        precipitation_mm: h.precipitation ? h.precipitation[i] : null,\n        wind_speed_kmh: h.wind_speed_10m ? h.wind_speed_10m[i] : null,\n        weather_code: h.weather_code ? h.weather_code[i] : null,\n        latitude: data.latitude,\n        longitude: data.longitude,\n        timezone: data.timezone,\n        utc_offset_seconds: data.utc_offset_seconds,\n        ingested_at: ingestedAt\n    };\n});\n\nmsg.count = docs.length;\nmsg.payload = [ docs ]; // array passado como argumento do insertMany\nreturn msg;\n",
+        "name": "Validar resposta",
+        "func": "// Valida a resposta ANTES de tocar em qualquer colecao.\n// Se falhar, aborta sem alterar nada; o ramo de erro regista em etl_logs.\nconst d = msg.payload;\n\nif (!d || !d.hourly || !Array.isArray(d.hourly.time) || d.hourly.time.length === 0) {\n    node.error(\"Resposta invalida da Open-Meteo.\", msg);\n    return null;\n}\n\nmsg.meta.record_count = d.hourly.time.length;\nreturn msg;\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 630,
-        "y": 400,
+        "x": 660,
+        "y": 200,
         "wires": [
             [
-                "f1a0000000000013"
+                "f1a0000000000018"
             ]
         ]
     },
     {
-        "id": "f1a0000000000013",
+        "id": "f1a0000000000018",
+        "type": "function",
+        "z": "f1a0000000000001",
+        "name": "Preparar original (JSON)",
+        "func": "// Preserva a resposta original da Open-Meteo, tal como veio, em\n// weather_raw_original. Upsert pela chave natural -> 1 doc por recolha\n// (sem duplicados), registando a 1a e a ultima extracao.\nconst raw = msg.payload;\n\nmsg.payload = [\n    { extraction_id: msg.extraction_id },\n    {\n        $set: {\n            extraction_id: msg.extraction_id,\n            source: \"open_meteo\",\n            airport_code: \"ATL\",\n            period: { start: \"2025-01-01\", end: \"2025-01-31\" },\n            format: \"json\",\n            endpoint: \"https://archive-api.open-meteo.com/v1/archive\",\n            record_count: msg.meta.record_count,\n            last_extracted_at: msg.batch_ts,\n            payload: raw\n        },\n        $setOnInsert: { first_extracted_at: msg.batch_ts }\n    },\n    { upsert: true }\n];\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 200,
+        "wires": [
+            [
+                "f1a0000000000019"
+            ]
+        ]
+    },
+    {
+        "id": "f1a0000000000019",
         "type": "mongodb4",
         "z": "f1a0000000000001",
         "clientNode": "f1a0000000000020",
         "mode": "collection",
-        "collection": "weather_raw",
-        "operation": "insertMany",
+        "collection": "weather_raw_original",
+        "operation": "updateOne",
         "output": "toArray",
         "maxTimeMS": "0",
         "handleDocId": false,
-        "name": "insertMany -> weather_raw",
-        "x": 820,
-        "y": 460,
+        "name": "updateOne -> weather_raw_original",
+        "x": 1060,
+        "y": 200,
         "wires": [
             [
-                "f1a0000000000014"
+                "f1a000000000001a"
             ]
         ]
     },
     {
-        "id": "f1a0000000000014",
+        "id": "f1a000000000001a",
         "type": "debug",
         "z": "f1a0000000000001",
-        "name": "Resultado (insertedCount)",
+        "name": "Original guardado (upsert)",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -177,8 +190,588 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 990,
-        "y": 520,
+        "x": 1280,
+        "y": 200,
         "wires": []
+    },
+    {
+        "id": "f1a000000000001c",
+        "type": "catch",
+        "z": "f1a0000000000001",
+        "name": "Falha no flow meteorologia",
+        "scope": [
+            "f1a0000000000011",
+            "f1a0000000000017",
+            "f1a0000000000018",
+            "f1a0000000000019"
+        ],
+        "uncaught": false,
+        "x": 360,
+        "y": 620,
+        "wires": [
+            [
+                "f1a000000000001d"
+            ]
+        ]
+    },
+    {
+        "id": "f1a000000000001d",
+        "type": "function",
+        "z": "f1a0000000000001",
+        "name": "Registar erro (etl_logs)",
+        "func": "// Regista a falha em etl_logs. Este ramo NUNCA apaga dados.\nmsg.payload = [{\n    source: \"open_meteo\",\n    flow: \"meteorologia\",\n    extraction_id: msg.extraction_id || \"open_meteo_ATL_2025-01\",\n    error: (msg.error && msg.error.message) ? msg.error.message : String(msg.error),\n    at: new Date().toISOString()\n}];\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 620,
+        "wires": [
+            [
+                "f1a000000000001e"
+            ]
+        ]
+    },
+    {
+        "id": "f1a000000000001e",
+        "type": "mongodb4",
+        "z": "f1a0000000000001",
+        "clientNode": "f1a0000000000020",
+        "mode": "collection",
+        "collection": "etl_logs",
+        "operation": "insertOne",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "insertOne -> etl_logs",
+        "x": 760,
+        "y": 660,
+        "wires": [
+            [
+                "f1a000000000001f"
+            ]
+        ]
+    },
+    {
+        "id": "f1a000000000001f",
+        "type": "debug",
+        "z": "f1a0000000000001",
+        "name": "Erro registado",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 950,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "f3a0000000000002",
+        "type": "comment",
+        "z": "f3a0000000000001",
+        "name": "Flow 3 - Voos: BTS TranStats -> MongoDB (flights_raw)",
+        "info": "Clica em 'Extrair voos (1 click)' para correr.\n\nPassos:\n1. inject (manual)\n2. function 'Preparar recolha (voos)' -> headers + timeout (NAO apaga)\n3. http request -> GET do zip mensal do BTS (2025_1), devolve Buffer (ret=bin)\n4. zip 'Descomprimir ZIP' (decompress) -> array [{ filename, payload: Buffer }]\n5. function 'Escolher CSV' -> escolhe a entrada .csv\n6. function 'Filtrar ATL -> CSV' -> filtra Origin=ATL + 2025-01 e monta o upsert\n7. mongodb4 'updateOne (upsert) -> flights_raw' -> exatamente 1 documento\n8. debug -> resultado\n\nResultado esperado: 1 documento em flights_raw com o CSV das partidas de ATL.",
+        "x": 340,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "f3a0000000000010",
+        "type": "inject",
+        "z": "f3a0000000000001",
+        "name": "Extrair voos (1 click)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 160,
+        "wires": [
+            [
+                "f3a0000000000015"
+            ]
+        ]
+    },
+    {
+        "id": "f3a0000000000015",
+        "type": "function",
+        "z": "f3a0000000000001",
+        "name": "Preparar recolha (voos)",
+        "func": "// Prepara o pedido ao BTS (SEM apagar dados).\n// O BTS pode demorar > 2 min a enviar os ~26 MB; o http request tem timeout\n// por omissao de 120 s, pelo que se sobe aqui o limite para 10 min.\n// O BTS aborta pedidos sem User-Agent de browser -> enviamos headers realistas.\nmsg.extraction_id = \"bts_2025_1_ATL\";\nmsg.batch_ts = new Date().toISOString();\nmsg.requestTimeout = 600000;\nmsg.headers = {\n    \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36\",\n    \"Accept\": \"*/*\"\n};\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 230,
+        "y": 220,
+        "wires": [
+            [
+                "f3a0000000000011"
+            ]
+        ]
+    },
+    {
+        "id": "f3a0000000000011",
+        "type": "http request",
+        "z": "f3a0000000000001",
+        "name": "BTS PREZIP (2025_1)",
+        "method": "GET",
+        "ret": "bin",
+        "paytoqs": "ignore",
+        "url": "https://transtats.bts.gov/PREZIP/On_Time_Reporting_Carrier_On_Time_Performance_1987_present_2025_1.zip",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 520,
+        "y": 340,
+        "wires": [
+            [
+                "f3a0000000000017"
+            ]
+        ]
+    },
+    {
+        "id": "f3a0000000000017",
+        "type": "zip",
+        "z": "f3a0000000000001",
+        "name": "Descomprimir ZIP",
+        "mode": "decompress",
+        "filename": "",
+        "compressionlevel": 6,
+        "outasstring": false,
+        "x": 700,
+        "y": 400,
+        "wires": [
+            [
+                "f3a0000000000018"
+            ]
+        ]
+    },
+    {
+        "id": "f3a0000000000018",
+        "type": "function",
+        "z": "f3a0000000000001",
+        "name": "Escolher CSV",
+        "func": "flow.set(\"f3_retry\", 0); // download OK -> reinicia contador de retries\n\n// O no 'zip' (decompress) devolve um array de { filename, payload: Buffer }.\nconst files = msg.payload;\n\nif (!Array.isArray(files)) {\n    node.error(\"O no zip nao devolveu um array de ficheiros\", msg);\n    return null;\n}\n\nconst csv = files.find(function (f) {\n    return typeof f.filename === \"string\" && f.filename.toLowerCase().lastIndexOf(\".csv\") !== -1;\n});\n\nif (!csv) {\n    node.error(\"Nao encontrei nenhum ficheiro .csv dentro do ZIP\", msg);\n    return null;\n}\n\nmsg.zipFilename = csv.filename;\nmsg.payload = csv.payload; // Buffer do CSV\nfiles.length = 0; // ajuda o garbage collector\n\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 850,
+        "y": 460,
+        "wires": [
+            [
+                "f3a0000000000019"
+            ]
+        ]
+    },
+    {
+        "id": "f3a0000000000019",
+        "type": "function",
+        "z": "f3a0000000000001",
+        "name": "Filtrar ATL -> CSV",
+        "func": "// Filtra as partidas de ATL em janeiro de 2025 e re-serializa um CSV enxuto.\nconst COLS = [\"FlightDate\", \"Reporting_Airline\", \"Origin\", \"Dest\", \"CRSDepTime\", \"DepTime\", \"DepDelayMinutes\", \"Cancelled\", \"Diverted\", \"WeatherDelay\"];\n\nfunction parseLine(line) {\n    const out = [];\n    let cur = \"\";\n    let inQ = false;\n    for (let i = 0; i < line.length; i++) {\n        const ch = line.charAt(i);\n        if (inQ) {\n            if (ch === '\"') {\n                if (line.charAt(i + 1) === '\"') { cur += '\"'; i++; }\n                else { inQ = false; }\n            } else { cur += ch; }\n        } else if (ch === '\"') { inQ = true; }\n        else if (ch === ',') { out.push(cur); cur = \"\"; }\n        else { cur += ch; }\n    }\n    out.push(cur);\n    return out;\n}\n\nlet text = msg.payload.toString(\"utf8\");\nif (text.charCodeAt(0) === 0xFEFF) { text = text.slice(1); }\nconst lines = text.split(\"\\n\");\ntext = null;\n\nconst header = parseLine(lines[0]);\nconst idx = {};\nfor (let c = 0; c < COLS.length; c++) { idx[COLS[c]] = header.indexOf(COLS[c]); }\nfor (let c = 0; c < COLS.length; c++) {\n    if (idx[COLS[c]] < 0) {\n        node.error(\"Coluna ausente no CSV do BTS: \" + COLS[c], msg);\n        return null;\n    }\n}\n\nconst out = [COLS.join(\",\")];\nlet count = 0;\nfor (let i = 1; i < lines.length; i++) {\n    const line = lines[i];\n    if (!line) { continue; }\n    const f = parseLine(line);\n    if (f[idx.Origin] !== \"ATL\") { continue; }\n    const fd = f[idx.FlightDate];\n    if (!fd || fd.slice(0, 7) !== \"2025-01\") { continue; }\n    const row = [];\n    for (let c = 0; c < COLS.length; c++) {\n        const v = f[idx[COLS[c]]];\n        row.push(v === undefined ? \"\" : v);\n    }\n    out.push(row.join(\",\"));\n    count++;\n}\nlines.length = 0; // liberta o array de linhas antes de montar o documento\n\nconst now = new Date().toISOString();\nconst doc = {\n    source: \"bts_transtats\",\n    dataset: \"On_Time_Reporting_Carrier_On_Time_Performance_1987_present_2025_1\",\n    airport_code: \"ATL\",\n    month: \"2025-01\",\n    format: \"csv\",\n    extraction_id: msg.extraction_id || \"bts_2025_1_ATL\",\n    columns: COLS,\n    row_count: count,\n    csv: out.join(\"\\n\"),\n    ingested_at: now\n};\n\nmsg.rowCount = count;\n// Upsert pela chave natural -> exatamente 1 documento (sem duplicados).\n// Nunca se apaga antes de confirmar o sucesso.\nmsg.payload = [\n    { source: \"bts_transtats\", dataset: doc.dataset, airport_code: \"ATL\", month: \"2025-01\" },\n    { $set: doc, $setOnInsert: { first_ingested_at: now } },\n    { upsert: true }\n];\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1000,
+        "y": 520,
+        "wires": [
+            [
+                "f3a0000000000013"
+            ]
+        ]
+    },
+    {
+        "id": "f3a0000000000013",
+        "type": "mongodb4",
+        "z": "f3a0000000000001",
+        "clientNode": "f1a0000000000020",
+        "mode": "collection",
+        "collection": "flights_raw",
+        "operation": "updateOne",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "updateOne (upsert) -> flights_raw",
+        "x": 1170,
+        "y": 580,
+        "wires": [
+            [
+                "f3a0000000000014"
+            ]
+        ]
+    },
+    {
+        "id": "f3a0000000000014",
+        "type": "debug",
+        "z": "f3a0000000000001",
+        "name": "Resultado (row_count / insertedCount)",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1360,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "f3a0000000000020",
+        "type": "catch",
+        "z": "f3a0000000000001",
+        "name": "Falha no download BTS",
+        "scope": [
+            "f3a0000000000011"
+        ],
+        "uncaught": false,
+        "x": 270,
+        "y": 540,
+        "wires": [
+            [
+                "f3a0000000000021"
+            ]
+        ]
+    },
+    {
+        "id": "f3a0000000000021",
+        "type": "function",
+        "z": "f3a0000000000001",
+        "name": "Preparar retry BTS",
+        "func": "// O BTS aborta ligacoes de forma intermitente; tentamos de novo com espera.\n// Limite de 5 tentativas para nao martelar o servidor.\nvar tent = (flow.get(\"f3_retry\") || 0) + 1;\n\nif (tent > 5) {\n    flow.set(\"f3_retry\", 0);\n    node.warn(\"Download do BTS falhou 5 vezes seguidas. Desisto desta execucao.\");\n    return null;\n}\n\nflow.set(\"f3_retry\", tent);\nnode.warn(\"Retry do download BTS #\" + tent);\n\nmsg.headers = {\n    \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36\",\n    \"Accept\": \"*/*\"\n};\nmsg.requestTimeout = 600000;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 470,
+        "y": 540,
+        "wires": [
+            [
+                "f3a0000000000022"
+            ]
+        ]
+    },
+    {
+        "id": "f3a0000000000022",
+        "type": "delay",
+        "z": "f3a0000000000001",
+        "name": "Esperar 30s",
+        "pauseType": "delay",
+        "timeout": "30",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 650,
+        "y": 540,
+        "wires": [
+            [
+                "f3a0000000000011"
+            ]
+        ]
+    },
+    {
+        "id": "f2a0000000000002",
+        "type": "comment",
+        "z": "f2a0000000000001",
+        "name": "Flow 2 - Aeroportos: OurAirports CSV -> XML -> MongoDB (metadados)",
+        "info": "Clica em 'Extrair aeroportos (1 click)' para correr.\n\nPassos:\n1. inject (manual)\n2. function 'Preparar pedido' -> headers + timeout\n3. http request -> GET airports.csv (string UTF-8)\n4. function 'Validar resposta' -> aborta se a resposta for invalida\n5. csv 'CSV -> registos' -> array de objetos (1 por aeroporto)\n6. function 'registos -> XML' -> gera XML (raiz <airports>, 1 <airport> por registo)\n7. file 'Guardar XML' -> escreve /data/raw/airports.xml\n8. function 'Metadados -> Mongo' -> upsert dos metadados\n9. mongodb4 'updateOne -> airports_raw_meta' -> 1 documento de metadados\n10. debug -> resultado\n\nResultado esperado: ficheiro airports.xml (~56 MB, 86242 aeroportos) e 1 doc\nde metadados em airports_raw_meta.",
+        "x": 360,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "f2a0000000000010",
+        "type": "inject",
+        "z": "f2a0000000000001",
+        "name": "Extrair aeroportos (1 click)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 160,
+        "wires": [
+            [
+                "f2a0000000000011"
+            ]
+        ]
+    },
+    {
+        "id": "f2a0000000000011",
+        "type": "function",
+        "z": "f2a0000000000001",
+        "name": "Preparar pedido",
+        "func": "// Pedido ao OurAirports: headers realistas + timeout folgado (defensivo).\nmsg.headers = {\n    \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36\",\n    \"Accept\": \"*/*\"\n};\nmsg.requestTimeout = 120000;\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 180,
+        "y": 220,
+        "wires": [
+            [
+                "f2a0000000000012"
+            ]
+        ]
+    },
+    {
+        "id": "f2a0000000000012",
+        "type": "http request",
+        "z": "f2a0000000000001",
+        "name": "OurAirports airports.csv",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://davidmegginson.github.io/ourairports-data/airports.csv",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 290,
+        "y": 280,
+        "wires": [
+            [
+                "f2a0000000000013"
+            ]
+        ]
+    },
+    {
+        "id": "f2a0000000000013",
+        "type": "function",
+        "z": "f2a0000000000001",
+        "name": "Validar resposta",
+        "func": "// Valida a resposta antes de qualquer escrita (nunca se perdem dados).\nif (msg.statusCode !== 200 || typeof msg.payload !== \"string\" || msg.payload.length < 100) {\n    node.error(\"Resposta invalida do OurAirports: nada foi alterado.\", msg);\n    return null;\n}\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 340,
+        "wires": [
+            [
+                "f2a0000000000014"
+            ]
+        ]
+    },
+    {
+        "id": "f2a0000000000014",
+        "type": "csv",
+        "z": "f2a0000000000001",
+        "name": "CSV -> registos",
+        "spec": "rfc",
+        "sep": ",",
+        "hdrin": true,
+        "hdrout": "none",
+        "multi": "mult",
+        "ret": "\\n",
+        "temp": "",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": true,
+        "include_null_values": true,
+        "x": 460,
+        "y": 400,
+        "wires": [
+            [
+                "f2a0000000000015"
+            ]
+        ]
+    },
+    {
+        "id": "f2a0000000000015",
+        "type": "function",
+        "z": "f2a0000000000001",
+        "name": "registos -> XML",
+        "func": "// Converte o array de registos (1 objeto por aeroporto) num documento XML.\n// Raiz <airports>, 1 elemento <airport> por registo, 1 sub-elemento por coluna.\n// Valores sao escapados (XML valido mesmo com &, <, >, \", ').\nconst rows = msg.payload;\n\nif (!Array.isArray(rows) || rows.length === 0) {\n    node.error(\"Sem registos para converter em XML\", msg);\n    return null;\n}\n\nfunction esc(s) {\n    if (s === null || s === undefined) return \"\";\n    return String(s)\n        .replace(/&/g, \"&amp;\")\n        .replace(/</g, \"&lt;\")\n        .replace(/>/g, \"&gt;\")\n        .replace(/\"/g, \"&quot;\")\n        .replace(/'/g, \"&apos;\");\n}\n\nconst cols = Object.keys(rows[0]);\nconst out = ['<?xml version=\"1.0\" encoding=\"UTF-8\"?>', \"<airports>\"];\nfor (let r = 0; r < rows.length; r++) {\n    out.push(\"  <airport>\");\n    for (let c = 0; c < cols.length; c++) {\n        const name = cols[c];\n        out.push(\"    <\" + name + \">\" + esc(rows[r][name]) + \"</\" + name + \">\");\n    }\n    out.push(\"  </airport>\");\n}\nout.push(\"</airports>\");\n\nmsg.payload = out.join(\"\\n\");\nmsg.xml_bytes = Buffer.byteLength(msg.payload, \"utf8\");\nmsg.row_count = rows.length;\nmsg.columns = cols;\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 160,
+        "wires": [
+            [
+                "f2a0000000000016"
+            ]
+        ]
+    },
+    {
+        "id": "f2a0000000000016",
+        "type": "file",
+        "z": "f2a0000000000001",
+        "name": "Guardar XML (airports.xml)",
+        "filename": "/data/raw/airports.xml",
+        "filenameType": "str",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "utf8",
+        "x": 760,
+        "y": 220,
+        "wires": [
+            [
+                "f2a0000000000017"
+            ]
+        ]
+    },
+    {
+        "id": "f2a0000000000017",
+        "type": "function",
+        "z": "f2a0000000000001",
+        "name": "Metadados -> Mongo",
+        "func": "// O XML (~56 MiB) excede o limite de 16 MiB por documento MongoDB, pelo que\n// fica em ficheiro (/data/raw/airports.xml); no Mongo guardamos apenas os\n// metadados de referencia. Upsert pela chave natural -> 1 doc, sem duplicados.\nconst now = new Date().toISOString();\nmsg.payload = [\n    { source: \"ourairports\", format: \"xml\" },\n    {\n        $set: {\n            source: \"ourairports\",\n            dataset: \"airports\",\n            format: \"xml\",\n            derived_from: \"csv\",\n            source_url: \"https://davidmegginson.github.io/ourairports-data/airports.csv\",\n            record_count: msg.row_count,\n            columns: msg.columns,\n            xml_bytes: msg.xml_bytes,\n            storage: \"file\",\n            path: \"/data/raw/airports.xml\",\n            last_extracted_at: now\n        },\n        $setOnInsert: { first_extracted_at: now }\n    },\n    { upsert: true }\n];\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 300,
+        "wires": [
+            [
+                "f2a0000000000018"
+            ]
+        ]
+    },
+    {
+        "id": "f2a0000000000018",
+        "type": "mongodb4",
+        "z": "f2a0000000000001",
+        "clientNode": "f1a0000000000020",
+        "mode": "collection",
+        "collection": "airports_raw_meta",
+        "operation": "updateOne",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "updateOne -> airports_raw_meta",
+        "x": 1000,
+        "y": 360,
+        "wires": [
+            [
+                "f2a0000000000019"
+            ]
+        ]
+    },
+    {
+        "id": "f2a0000000000019",
+        "type": "debug",
+        "z": "f2a0000000000001",
+        "name": "Resultado (registos / bytes)",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1180,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "f2a000000000001a",
+        "type": "catch",
+        "z": "f2a0000000000001",
+        "name": "Erro no flow aeroportos",
+        "scope": [
+            "f2a0000000000012",
+            "f2a0000000000014",
+            "f2a0000000000015",
+            "f2a0000000000016",
+            "f2a0000000000018"
+        ],
+        "uncaught": false,
+        "x": 500,
+        "y": 620,
+        "wires": [
+            [
+                "f2a000000000001b"
+            ]
+        ]
+    },
+    {
+        "id": "f2a000000000001b",
+        "type": "function",
+        "z": "f2a0000000000001",
+        "name": "Registar erro (etl_logs)",
+        "func": "// Regista a falha em etl_logs. Este ramo nunca apaga nem altera dados de origem.\nmsg.payload = [{\n    source: \"ourairports\",\n    flow: \"aeroportos\",\n    error: (msg.error && msg.error.message) ? msg.error.message : String(msg.error),\n    at: new Date().toISOString()\n}];\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 680,
+        "wires": [
+            [
+                "f2a000000000001c"
+            ]
+        ]
+    },
+    {
+        "id": "f2a000000000001c",
+        "type": "mongodb4",
+        "z": "f2a0000000000001",
+        "clientNode": "f1a0000000000020",
+        "mode": "collection",
+        "collection": "etl_logs",
+        "operation": "insertOne",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "insertOne -> etl_logs",
+        "x": 940,
+        "y": 740,
+        "wires": [
+            []
+        ]
     }
 ]
