@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Controlo de fluxos de voos em aeroportos | Proposta ETL</title>
+<style>
+:root{--bg:#09111f;--panel:#121e31;--panel2:#192941;--line:#2b3d56;--text:#f1f5fc;--muted:#b5c2d5;--mint:#68dfca;--blue:#9ac2ff;--amber:#ffd58a}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.5}
+.toolbar{position:sticky;top:0;z-index:5;background:#09111fee;backdrop-filter:blur(10px);display:flex;justify-content:center;gap:10px;padding:12px;border-bottom:1px solid var(--line)}button{background:#172941;border:1px solid #3a526f;color:var(--text);border-radius:9px;padding:10px 14px;font-weight:bold;cursor:pointer}button:hover{border-color:var(--mint)}
+.deck{max-width:1120px;margin:auto;padding:22px}.slide{position:relative;min-height:650px;margin-bottom:22px;padding:46px 48px;border:1px solid var(--line);border-radius:22px;background:radial-gradient(circle at 100% 0%,#1b3549 0,transparent 30%),linear-gradient(140deg,#121e31,#0d1727);display:flex;flex-direction:column;justify-content:center;overflow:hidden;break-after:page}
+.cover{background:radial-gradient(ellipse at 82% 16%,#265166 0,transparent 38%),linear-gradient(135deg,#172b43,#0b1423)}.eyebrow,.num{font-size:.82rem;font-weight:bold;letter-spacing:.15em;text-transform:uppercase;color:var(--mint)}h1{font-size:clamp(2.7rem,7vw,5.2rem);line-height:1.02;margin:15px 0}h2{font-size:clamp(1.8rem,4vw,2.65rem);line-height:1.12;margin:9px 0 20px}h3{font-size:1.08rem;margin:0 0 9px}.subtitle{font-size:1.2rem;color:var(--muted);max-width:790px}.lead{font-size:1.13rem;color:#e0e9f7;max-width:930px}.muted{color:var(--muted)}.mint{color:var(--mint)}.pills{display:flex;gap:9px;flex-wrap:wrap;margin-top:25px}.pill{border:1px solid #3a526c;border-radius:999px;padding:7px 12px;background:#14263a;color:#e1edfc;font-size:.88rem}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.cards.three{grid-template-columns:repeat(3,minmax(0,1fr))}.card{background:rgba(17,29,47,.96);border:1px solid var(--line);border-radius:15px;padding:18px}.card p{color:#d2deed;margin:7px 0}.card ul{padding-left:19px;margin:8px 0;color:#d2deed}.card li{margin:5px 0}.icon{width:40px;height:40px;display:grid;place-items:center;background:#183a43;color:var(--mint);border-radius:11px;font-size:1.25rem;margin-bottom:12px}.quote{background:#102b2b;border-left:4px solid var(--mint);border-radius:0 12px 12px 0;padding:15px 18px;font-size:1.1rem;margin:12px 0}.note{color:var(--amber);font-size:.88rem;margin-top:14px}.small{font-size:.86rem;color:var(--muted)}a{color:var(--blue);overflow-wrap:anywhere}.phases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.phase{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:17px}.phase .letter{font-size:2rem;font-weight:bold;color:var(--mint)}.phase p{color:#d2deed}.flow{display:flex;align-items:stretch;gap:9px;margin:18px 0}.flowbox{flex:1;text-align:center;padding:14px 8px;background:#14243a;border:1px solid var(--line);border-radius:12px}.flowbox b{display:block}.flowbox small{color:var(--muted)}.arrow{align-self:center;color:var(--mint);font-size:1.4rem}.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:620px;background:#111d30}th,td{text-align:left;padding:12px 13px;border-bottom:1px solid var(--line);vertical-align:top}th{background:#1b2b42;color:#e4efff}td{color:#d3deed}tr:last-child td{border:0}.faq{display:grid;grid-template-columns:1fr 1fr;gap:12px}.faq .card h3{color:var(--mint)}.foot{position:absolute;bottom:17px;left:48px;right:48px;display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:8px;color:#8191a8;font-size:.78rem}.center{text-align:center;align-items:center}.center .lead{margin:auto}.sources{font-size:.86rem}.sources li{margin:7px 0}
+@media(max-width:760px){.deck{padding:9px}.slide{min-height:0;padding:28px 21px;margin-bottom:12px;break-after:auto}.cards,.cards.three,.phases,.faq{grid-template-columns:1fr}.flow{flex-direction:column}.arrow{transform:rotate(90deg);align-self:center}.foot{position:static;margin-top:26px}.toolbar{position:static;flex-wrap:wrap}.subtitle{font-size:1.05rem}}
+@media print{body{background:white;color:#111}.toolbar{display:none}.deck{max-width:none;padding:0}.slide{min-height:96vh;margin:0;border:0;border-radius:0;background:white!important;color:#111;page-break-after:always;padding:35px}.slide:before{display:none}.card,.phase,.flowbox,table{background:white!important;border-color:#aaa}.card p,.card li,.muted,.subtitle,.lead,td,.small{color:#333}.pill{background:white;color:#222;border-color:#aaa}.foot{color:#555;border-color:#aaa}.quote{background:#f1f7f7;color:#111}.note{color:#744c00}a{color:#124e8a}}
+</style>
+</head>
+<body>
+<div class="toolbar">
+<button onclick="window.print()">Imprimir / Guardar como PDF</button>
+<button onclick="document.getElementById('slide1').scrollIntoView({behavior:'smooth'})">Início</button>
+<button onclick="document.getElementById('slide6').scrollIntoView({behavior:'smooth'})">Tecnologias</button>
+</div>
+<main class="deck">
+<section class="slide cover" id="slide1">
+ <div class="eyebrow">Proposta de projeto · Integração de dados</div>
+ <h1>Controlo de fluxos de voos em aeroportos</h1>
+ <p class="subtitle">Integração de dados de voos, aeroportos e meteorologia através de um processo ETL.</p>
+ <div class="pills"><span class="pill">CSV · JSON · XML</span><span class="pill">Node-RED</span><span class="pill">MongoDB RAW</span><span class="pill">KNIME · PostgreSQL · Grafana</span></div>
+ <p class="muted" style="margin-top:34px"></p>
+ <div class="foot"><span>Controlo de fluxos de voos em aeroportos</span><span>01 / 06</span></div>
+</section>
+
+<section class="slide" id="slide2">
+ <div class="num">01 · PROBLEMA</div><h2>Porque faz sentido este projeto?</h2>
+ <p class="lead">Os dados necessários para estudar o desempenho dos voos estão distribuídos por fontes distintas e chegam em formatos e estruturas diferentes. Sem um processo comum, é difícil validar, cruzar e analisar estes dados de forma consistente.</p>
+ <div class="cards three" style="margin-top:20px">
+  <div class="card"><div class="icon">✈</div><h3>Voos</h3><p>Contêm informação sobre a companhia, origem, destino, horários e atrasos, conforme os campos disponíveis.</p></div>
+  <div class="card"><div class="icon">⌖</div><h3>Aeroportos</h3><p>Permitem identificar cada aeroporto e conhecer a sua localização geográfica.</p></div>
+  <div class="card"><div class="icon">☁</div><h3>Meteorologia</h3><p>Acrescenta informação sobre as condições existentes num local e numa hora.</p></div>
+ </div>
+ <div class="quote"><strong>Problema a resolver:</strong> como reunir e uniformizar estes dados para conseguir analisá-los em conjunto, em vez de consultar cada fonte separadamente?</div>
+ <div class="foot"><span>PROBLEMA</span><span>02 / 06</span></div>
+</section>
+
+<section class="slide" id="slide3">
+ <div class="num">02 · OBJETIVO</div><h2>O que pretendo alcançar?</h2>
+ <div class="quote"><strong>Objetivo principal</strong><br>Pretendo desenvolver um processo ETL que recolha dados de voos, meteorologia e aeroportos, preserve os dados originais no MongoDB, transforme e integre a informação no KNIME, carregue os resultados no PostgreSQL e permita analisá-los no Grafana.</div>
+ <div class="cards">
+  <div class="card"><h3>Objetivos específicos</h3><ul><li>Automatizar a recolha de fontes públicas com Node-RED, sempre que a fonte o permita.</li><li>Preservar os registos de origem no MongoDB, sem os confundir com os dados tratados.</li><li>Uniformizar datas, horas, tipos e códigos de aeroportos no KNIME.</li><li>Tratar valores em falta, duplicados e registos sem correspondência.</li><li>Carregar tabelas validadas no PostgreSQL e expor indicadores no Grafana.</li></ul></div>
+  <div class="card"><h3>O que quero conseguir analisar</h3><ul><li>Número total de voos incluídos no conjunto de dados.</li><li>Atraso médio e percentagem de voos atrasados, se os campos permitirem.</li><li>Número de voos e atrasos por destino.</li><li>Evolução dos atrasos ao longo do período selecionado.</li><li>Possível associação entre condições meteorológicas e atrasos.</li></ul></div>
+ </div>
+ <p class="note">Âmbito efetivamente extraído até agora: partidas da Delta Air Lines (DL), com origem em Atlanta (ATL), de 1 a 7 de janeiro de 2025. A extensão a todo o mês ou a outras companhias será uma melhoria posterior, não um resultado já obtido.</p>
+ <div class="foot"><span>OBJETIVO</span><span>03 / 06</span></div>
+</section>
+
+<section class="slide" id="slide4">
+ <div class="num">03 · AMOSTRA E FONTES</div><h2>Amostra e fontes de dados</h2>
+ <p class="lead">A amostra inclui partidas de Atlanta (ATL), operadas pela Delta Air Lines (DL), entre 1 e 7 de janeiro de 2025. Escolhi este período limitado para testar a integração das fontes e validar o processo ETL sem tornar o âmbito inicial demasiado amplo.</p>
+ <div class="cards">
+  <div class="card"><div class="icon">◎</div><h3>Âmbito do exemplo</h3><p>O ficheiro atual contém partidas de Atlanta entre 1 e 7 de janeiro de 2025, operadas pela Delta. O filtro de origem não recolhe chegadas a Atlanta: inclui voos que partem deste aeroporto.</p><p>O objetivo inicial é validar o processo ETL com um volume limitado. A arquitetura poderá ser adaptada a outros aeroportos numa fase futura.</p></div>
+ </div>
+ <div class="cards three" style="margin-top:14px">
+  <div class="card"><span class="pill">FICHEIRO 1 · CSV</span><h3 style="margin-top:12px">flights.csv</h3><p>Partidas de ATL: companhia, destino, data, horários e atraso, conforme os campos disponibilizados pelo BTS.</p><a href="https://www.transtats.bts.gov/ontime/Departures.aspx" target="_blank" rel="noopener">Página de partidas BTS ↗</a></div>
+  <div class="card"><span class="pill">FICHEIRO 2 · JSON</span><h3 style="margin-top:12px">weather.json</h3><p>Dados meteorológicos horários para as coordenadas de Atlanta, entre 1 e 7 de janeiro de 2025. A análise considera inicialmente as condições no aeroporto de origem.</p><a href="https://open-meteo.com/en/docs/historical-weather-api" target="_blank" rel="noopener">Open-Meteo ↗</a></div>
+  <div class="card"><span class="pill">FICHEIRO 3 · XML</span><h3 style="margin-top:12px">airports.xml</h3><p>Cadastro de ATL e dos aeroportos de destino presentes em flights.csv: códigos, nomes, países e coordenadas quando disponíveis.</p><a href="https://ourairports.com/data/" target="_blank" rel="noopener">OurAirports ↗</a></div>
+ </div>
+ <div class="cards" style="margin-top:14px">
+  <div class="card"><h3>Como se relacionam?</h3><ul><li><strong>Voos + aeroportos:</strong> usar os códigos <code>ORIGIN</code> e <code>DEST</code>.</li><li><strong>Voos + meteorologia:</strong> associar pela data/hora da partida e pelas condições em Atlanta.</li></ul></div>
+  <div class="card"><h3>O que resulta da integração?</h3><p>Uma linha por voo, enriquecida com o nome do destino e as condições meteorológicas aproximadas na origem. Exemplo de campos: data, origem, destino, atraso, temperatura, precipitação e vento.</p></div>
+ </div>
+ <p class="note">A meteorologia será analisada inicialmente apenas em Atlanta. A correspondência temporal tem de respeitar os fusos horários. Uma associação entre mau tempo e atrasos não prova causalidade. O XML será convertido a partir dos dados públicos da OurAirports.</p>
+ <div class="foot"><span>EXEMPLO DE EXTRAÇÃO</span><span>04 / 06</span></div>
+</section>
+
+<section class="slide" id="slide5">
+ <div class="num">04 · ARQUITETURA E PROCESSO ETL</div><h2>Como os dados percorrem o pipeline</h2>
+ <div class="phases">
+  <div class="phase"><div class="letter">1</div><h3>Extração — Node-RED</h3><p>Obter dados das três fontes: voos (BTS), meteorologia (Open-Meteo) e aeroportos (OurAirports).</p><p>Receber JSON da API meteorológica e preparar os ficheiros CSV e XML.</p><p>Validar a automatização do BTS; o CSV atual foi descarregado manualmente.</p></div>
+  <div class="phase"><div class="letter">2</div><h3>Tratamento — KNIME</h3><p>Ler os dados originais guardados no MongoDB.</p><p>Tratar valores em falta e duplicados; uniformizar datas, horas e códigos dos aeroportos.</p><p>Relacionar voos, meteorologia e aeroportos e calcular indicadores.</p></div>
+  <div class="phase"><div class="letter">3</div><h3>Loading — PostgreSQL</h3><p>Carregar os dados tratados em tabelas relacionais.</p><p>Validar contagens, chaves, valores nulos e correspondências entre tabelas.</p><p>Disponibilizar os dados validados ao Grafana para construir os dashboards.</p></div>
+ </div>
+ <h3 style="margin-top:22px">Arquitetura completa</h3>
+ <div class="flow"><div class="flowbox"><b>Node-RED</b><small>Extração</small></div><div class="arrow">→</div><div class="flowbox"><b>MongoDB</b><small>RAW / original</small></div><div class="arrow">→</div><div class="flowbox"><b>KNIME</b><small>ETL / transformação</small></div><div class="arrow">→</div><div class="flowbox"><b>PostgreSQL</b><small>Tratado</small></div><div class="arrow">→</div><div class="flowbox"><b>Grafana</b><small>Dashboard</small></div></div>
+ <p class="note">MongoDB guarda os dados originais (RAW) entre a extração e o tratamento. A automatização do BTS será confirmada após um teste real.</p>
+ <div class="foot"><span>METODOLOGIA ETL</span><span>05 / 06</span></div>
+</section>
+
+<section class="slide" id="slide6">
+ <div class="num">05 · TECNOLOGIAS E RESULTADO</div><h2>Que ferramentas vou utilizar?</h2>
+ <div class="tablewrap">
+ <table><thead><tr><th>Fase</th><th>Ferramenta</th><th>Utilização</th></tr></thead><tbody>
+ <tr><td>Extração</td><td>Node-RED + BTS TranStats</td><td>Orquestrar a recolha; validar um método suportado para automatizar o acesso aos dados. O CSV atual foi descarregado manualmente para iniciar o projeto.</td></tr>
+ <tr><td>Extração</td><td>Node-RED + OurAirports</td><td>Obter os dados de aeroportos e selecionar os códigos necessários; preparar/gerar XML para cumprir o formato de entrada.</td></tr>
+ <tr><td>Extração</td><td>Node-RED + Open-Meteo API</td><td>Fazer pedido HTTP, receber JSON e preparar os documentos para o armazenamento RAW.</td></tr>
+ <tr><td>Armazenamento RAW</td><td>MongoDB</td><td>Guardar os registos originais em coleções separadas antes da transformação.</td></tr>
+ <tr><td>Tratamento</td><td>KNIME Analytics Platform</td><td>Ler os dados RAW, limpar, normalizar, integrar e calcular indicadores.</td></tr>
+ <tr><td>Carregamento</td><td>PostgreSQL</td><td>Guardar os dados tratados em tabelas relacionais, com chaves e tipos coerentes.</td></tr>
+ <tr><td>Visualização</td><td>Grafana</td><td>Consultar PostgreSQL e apresentar indicadores de voos, atrasos e tendências.</td></tr>
+ </tbody></table></div>
+ <div class="cards" style="margin-top:16px">
+  <div class="card"><h3>Estrutura inicial da base de dados</h3><p><strong>MongoDB RAW:</strong> coleções <code>flights_raw</code>, <code>weather_raw</code> e <code>airports_raw</code>.</p><p><strong>PostgreSQL tratado:</strong> tabelas <code>flights</code>, <code>airports</code> e <code>weather_hourly</code>.</p></div>
+  <div class="card"><h3>O que pretendo ver no Grafana</h3><ul><li>Partidas por dia.</li><li>Destinos mais frequentes.</li><li>Atraso médio e percentagem de voos atrasados.</li><li>Possível associação entre meteorologia em Atlanta e atrasos.</li></ul><p class="muted">Os indicadores serão calculados após o tratamento e a validação dos dados.</p></div>
+ </div>
+ <div class="foot"><span>TECNOLOGIAS</span><span>06 / 06</span></div>
+</section>
+
+
+</main>
+</body>
+</html>
