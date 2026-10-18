@@ -22,7 +22,7 @@
         <entry key="dataCellComparisonMode" type="xstring" value="STRICT"/>
         <entry key="includeMatchesInOutput" type="xboolean" value="true"/>
         <entry key="includeLeftUnmatchedInOutput" type="xboolean" value="true"/>
-        <entry key="includeRightUnmatchedInOutput" type="xboolean" value="false"/>
+        <entry key="includeRightUnmatchedInOutput" type="xboolean" value="true"/>
         <config key="leftColumnSelectionConfigV2">
             <entry key="mode" type="xstring" value="MANUAL"/>
             <config key="patternFilter">
@@ -102,7 +102,7 @@
         <entry key="mergeJoinColumns" type="xboolean" value="false"/>
         <entry key="duplicateHandling" type="xstring" value="APPEND_SUFFIX"/>
         <entry key="suffix" type="xstring" value=" (Right)"/>
-        <entry key="outputUnmatchedRowsToSeparatePorts" type="xboolean" value="false"/>
+        <entry key="outputUnmatchedRowsToSeparatePorts" type="xboolean" value="true"/>
         <entry key="rowKeyFactory" type="xstring" value="CONCATENATE"/>
         <entry key="rowKeySeparator" type="xstring" value="_"/>
         <entry key="outputRowOrder" type="xstring" value="ARBITRARY"/>
@@ -136,25 +136,21 @@
         </config>
         <config key="port_2">
             <entry key="index" type="xint" value="2"/>
-            <entry key="port_spec_class" type="xstring" value="org.knime.core.node.port.inactive.InactiveBranchPortObjectSpec"/>
-            <entry key="port_object_class" type="xstring" value="org.knime.core.node.port.inactive.InactiveBranchPortObject"/>
-            <entry key="port_object_summary" type="xstring" value="Inactive Port Object"/>
-            <entry key="port_spec_location" type="xstring" value="spec/spec.zip"/>
-            <entry key="port_object_location" type="xstring" value="object/portobject.zip"/>
+            <entry key="port_spec_class" type="xstring" value="org.knime.core.data.DataTableSpec"/>
+            <entry key="port_object_class" type="xstring" value="org.knime.core.node.BufferedDataTable"/>
+            <entry key="port_object_summary" type="xstring" value="Rows: 0, Cols: 24"/>
             <entry key="port_dir_location" type="xstring" value="port_2"/>
         </config>
         <config key="port_3">
             <entry key="index" type="xint" value="3"/>
-            <entry key="port_spec_class" type="xstring" value="org.knime.core.node.port.inactive.InactiveBranchPortObjectSpec"/>
-            <entry key="port_object_class" type="xstring" value="org.knime.core.node.port.inactive.InactiveBranchPortObject"/>
-            <entry key="port_object_summary" type="xstring" value="Inactive Port Object"/>
-            <entry key="port_spec_location" type="xstring" value="spec/spec.zip"/>
-            <entry key="port_object_location" type="xstring" value="object/portobject.zip"/>
+            <entry key="port_spec_class" type="xstring" value="org.knime.core.data.DataTableSpec"/>
+            <entry key="port_object_class" type="xstring" value="org.knime.core.node.BufferedDataTable"/>
+            <entry key="port_object_summary" type="xstring" value="Rows: 0, Cols: 4"/>
             <entry key="port_dir_location" type="xstring" value="port_3"/>
         </config>
     </config>
     <config key="filestores">
         <entry key="file_store_location" type="xstring" isnull="true" value=""/>
-        <entry key="file_store_id" type="xstring" value="901d3d31-6279-481a-97fb-15ebe9d5d620"/>
+        <entry key="file_store_id" type="xstring" value="6e10657f-57d2-4d1e-b6ba-1ad49b299308"/>
     </config>
 </config>

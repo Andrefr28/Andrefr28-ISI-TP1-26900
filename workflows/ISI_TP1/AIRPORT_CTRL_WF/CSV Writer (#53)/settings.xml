@@ -11,7 +11,7 @@
                 <config key="path">
                     <entry key="location_present" type="xboolean" value="true"/>
                     <entry key="file_system_type" type="xstring" value="LOCAL"/>
-                    <entry key="path" type="xstring" value="C:\Users\j_nun\knime-workspace\ISI_TP1\airport_dataset_ai.csv"/>
+                    <entry key="path" type="xstring" value="C:\Users\j_nun\knime-workspace\ISI_TP1\LOGS_airport_dataset_ai.csv"/>
                 </config>
                 <config key="file_system_chooser__Internals">
                     <entry key="has_fs_port" type="xboolean" value="false"/>
@@ -59,6 +59,21 @@
         <entry key="performNewValidation" type="xboolean" value="true"/>
     </config>
     <config key="variables"/>
+    <config key="nodeAnnotation">
+        <entry key="text" type="xstring" value="LOGS"/>
+        <entry key="contentType" type="xstring" value="text/plain"/>
+        <entry key="bgcolor" type="xint" value="16777215"/>
+        <entry key="x-coordinate" type="xint" value="0"/>
+        <entry key="y-coordinate" type="xint" value="0"/>
+        <entry key="width" type="xint" value="0"/>
+        <entry key="height" type="xint" value="0"/>
+        <entry key="alignment" type="xstring" value="CENTER"/>
+        <entry key="borderSize" type="xint" value="0"/>
+        <entry key="borderColor" type="xint" value="0"/>
+        <entry key="defFontSize" type="xint" value="-1"/>
+        <entry key="annotation-version" type="xint" value="20230412"/>
+        <config key="styles"/>
+    </config>
     <entry key="customDescription" type="xstring" isnull="true" value=""/>
     <entry key="state" type="xstring" value="EXECUTED"/>
     <entry key="factory" type="xstring" value="org.knime.base.node.io.filehandling.csv.writer.CSVWriter2NodeFactory"/>
@@ -82,6 +97,6 @@
     <config key="ports"/>
     <config key="filestores">
         <entry key="file_store_location" type="xstring" isnull="true" value=""/>
-        <entry key="file_store_id" type="xstring" value="ef754d1b-3417-4895-a922-823032ad0ee7"/>
+        <entry key="file_store_id" type="xstring" value="6e43f4c5-f044-4f91-a6d1-78f3627508b4"/>
     </config>
 </config>

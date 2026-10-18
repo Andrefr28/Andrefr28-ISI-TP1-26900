@@ -6,10 +6,6 @@
         <entry key="memory_policy" type="xstring" value="CacheSmallInMemory"/>
     </config>
     <config key="model">
-        <config key="group_cols_Internals">
-            <entry key="SettingsModelID" type="xstring" value="SMID_columnfilter"/>
-            <entry key="EnabledStatus" type="xboolean" value="true"/>
-        </config>
         <config key="group_cols">
             <entry key="filter-type" type="xstring" value="STANDARD"/>
             <config key="included_names">
@@ -21,61 +17,27 @@
             <entry key="enforce_option" type="xstring" value="EnforceExclusion"/>
             <config key="name_pattern">
                 <entry key="pattern" type="xstring" value=""/>
-                <entry key="type" type="xstring" value="Wildcard"/>
                 <entry key="caseSensitive" type="xboolean" value="true"/>
                 <entry key="excludeMatching" type="xboolean" value="false"/>
+                <entry key="type" type="xstring" value="Wildcard"/>
             </config>
             <config key="datatype">
                 <config key="typelist"/>
             </config>
         </config>
-        <config key="retain_order_Internals">
-            <entry key="SettingsModelID" type="xstring" value="SMID_boolean"/>
-            <entry key="EnabledStatus" type="xboolean" value="true"/>
-        </config>
-        <entry key="retain_order" type="xboolean" value="true"/>
-        <config key="add_row_duplicate_flag_Internals">
-            <entry key="SettingsModelID" type="xstring" value="SMID_boolean"/>
-            <entry key="EnabledStatus" type="xboolean" value="true"/>
-        </config>
-        <entry key="add_row_duplicate_flag" type="xboolean" value="true"/>
-        <config key="unique_flag_column_name_Internals">
-            <entry key="SettingsModelID" type="xstring" value="SMID_string"/>
-            <entry key="EnabledStatus" type="xboolean" value="true"/>
-        </config>
-        <entry key="unique_flag_column_name" type="xstring" value="Duplicate Status"/>
-        <config key="add_row_id_flag_Internals">
-            <entry key="SettingsModelID" type="xstring" value="SMID_boolean"/>
-            <entry key="EnabledStatus" type="xboolean" value="true"/>
-        </config>
-        <entry key="add_row_id_flag" type="xboolean" value="false"/>
-        <config key="row_id_flag_column_name_Internals">
-            <entry key="SettingsModelID" type="xstring" value="SMID_string"/>
-            <entry key="EnabledStatus" type="xboolean" value="true"/>
-        </config>
-        <entry key="row_id_flag_column_name" type="xstring" value="Duplicate Chosen"/>
-        <config key="in_memory_Internals">
-            <entry key="SettingsModelID" type="xstring" value="SMID_boolean"/>
-            <entry key="EnabledStatus" type="xboolean" value="true"/>
-        </config>
-        <entry key="in_memory" type="xboolean" value="false"/>
-        <config key="remove_duplicates_Internals">
-            <entry key="SettingsModelID" type="xstring" value="SMID_boolean"/>
-            <entry key="EnabledStatus" type="xboolean" value="true"/>
-        </config>
         <entry key="remove_duplicates" type="xboolean" value="true"/>
+        <entry key="add_row_duplicate_flag" type="xboolean" value="true"/>
+        <entry key="unique_flag_column_name" type="xstring" value="Duplicate Status"/>
+        <entry key="add_row_id_flag" type="xboolean" value="false"/>
+        <entry key="row_id_flag_column_name" type="xstring" value="Duplicate Chosen"/>
+        <entry key="doNotAllowEmptyBlankOrPaddedColumnName_Internals" type="xboolean" value="true"/>
         <entry key="row_selection" type="xstring" value="FIRST"/>
-        <config key="reference_col_Internals">
-            <entry key="SettingsModelID" type="xstring" value="SMID_string"/>
-            <entry key="EnabledStatus" type="xboolean" value="true"/>
-        </config>
         <entry key="reference_col" type="xstring" isnull="true" value=""/>
-        <config key="update_domains_Internals">
-            <entry key="SettingsModelID" type="xstring" value="SMID_boolean"/>
-            <entry key="EnabledStatus" type="xboolean" value="true"/>
-        </config>
+        <entry key="in_memory" type="xboolean" value="false"/>
+        <entry key="retain_order" type="xboolean" value="true"/>
         <entry key="update_domains" type="xboolean" value="false"/>
     </config>
+    <config key="variables"/>
     <entry key="customDescription" type="xstring" isnull="true" value=""/>
     <entry key="state" type="xstring" value="EXECUTED"/>
     <entry key="factory" type="xstring" value="org.knime.base.node.preproc.duplicates.DuplicateRowFilterNodeFactory"/>
@@ -103,6 +65,6 @@
     </config>
     <config key="filestores">
         <entry key="file_store_location" type="xstring" isnull="true" value=""/>
-        <entry key="file_store_id" type="xstring" value="173a6efc-ad20-4e64-bfe7-d860cc04ddaf"/>
+        <entry key="file_store_id" type="xstring" value="0b3ec18b-f1e9-4e91-9004-b062249d95e6"/>
     </config>
 </config>
