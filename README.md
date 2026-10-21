@@ -1,58 +1,179 @@
-# Airport Intelligence - ISI TP1
+# Airport Intelligence — Projeto de Integração de Sistemas de Informação
 
-Projeto academico de Integracao de Sistemas de Informacao.
+## 1. Identificação dos autores
 
-## Objetivo
+- **Autor:** André Rodrigues
+- **Número:** 26900
+- **Curso:** Licenciatura em Engenharia de Sistemas Informáticos
+- **Unidade Curricular:** Integração de Sistemas de Informação (ISI)
+- **Instituição:** Instituto Politécnico do Cávado e do Ave (IPCA)
+- **Ano letivo:** 2026/2027
 
-Desenvolver um processo ETL para integrar dados de voos, aeroportos e meteorologia, permitindo analisar indicadores de desempenho como total de voos, atrasos medios, percentagem de atrasos e possivel relacao com condicoes meteorologicas.
+## 2. Descrição do projeto
 
-## Tema
+O Airport Intelligence é um projeto de integração e análise de dados relacionados com voos, aeroportos e condições meteorológicas.
 
-O estudo inicial foca-se nas partidas do aeroporto Hartsfield-Jackson Atlanta International Airport (ATL), durante janeiro de 2025.
+A solução utiliza diferentes fontes de dados e formatos, implementando processos de extração, transformação e carregamento (ETL). Os dados são recolhidos através do Node-RED, armazenados nas estruturas definidas para cada fonte, transformados no KNIME e carregados para o PostgreSQL. O Grafana permite consultar e visualizar os indicadores produzidos.
 
-## Fontes previstas
+O projeto inclui ainda um workflow experimental de Machine Learning, desenvolvido no KNIME, para a classificação de voos.
 
-- `flights.csv` - BTS TranStats, dados historicos de partidas.
-- `weather.json` - Open-Meteo API, meteorologia horaria.
-- `airports.xml` - OurAirports, cadastro de aeroportos.
+## 3. Tecnologias utilizadas
 
-## Ferramentas
+| Tecnologia | Função |
+|---|---|
+| Docker Compose | Inicialização dos serviços definidos no ambiente |
+| Node-RED | Extração e preparação inicial dos dados |
+| MongoDB | Armazenamento dos dados originais de determinadas fontes |
+| KNIME Analytics Platform | Transformação, integração, carregamento e Machine Learning |
+| PostgreSQL | Armazenamento dos dados tratados |
+| Grafana | Visualização dos dados através de dashboards |
 
-- Node-RED - automatizacao de pedidos e recolha de dados.
-- MongoDB - armazenamento de dados raw em JSON.
-- KNIME - processo ETL: leitura, limpeza, validacao, transformacao e integracao.
-- PostgreSQL - armazenamento dos dados tratados.
-- Grafana - dashboard e indicadores.
+## 4. Fontes de dados
 
-## Fluxo previsto
+- **BTS — TranStats:** dados históricos de voos, obtidos em ficheiros ZIP com dados CSV.
+- **Open-Meteo:** dados meteorológicos históricos, obtidos através de uma API que devolve JSON.
+- **OurAirports:** dados de aeroportos, originalmente disponibilizados em CSV e preparados em XML para leitura no KNIME.
 
-```text
-Node-RED / ficheiros -> MongoDB -> KNIME -> PostgreSQL -> Grafana
-```
+Referências:
 
-## Estrutura
+- https://transtats.bts.gov/
+- https://open-meteo.com/en/docs/historical-weather-api
+- https://ourairports.com/data/
 
-- `dados/raw/` - ficheiros originais recolhidos.
-- `dados/processed/` - ficheiros tratados ou exportacoes intermédias.
-- `database/` - scripts SQL da base de dados.
-- `docs/` - plano, proposta e documentacao.
-- `node-red/` - flows e notas do Node-RED.
-- `workflows/` - workflows KNIME.
-- `relatorio/` - relatorio final.
+## 5. Descrição dos ficheiros e componentes entregues
 
-## Ambiente Docker
+A organização exata deve corresponder aos ficheiros presentes no repositório.
 
-Servicos previstos:
+| Ficheiro ou componente | Descrição |
+|---|---|
+| `README.md` | Identificação dos autores, descrição do projeto e instruções de execução. |
+| `docker-compose.yml` ou `compose.yaml` | Configuração dos serviços executados através do Docker Compose, se incluída na entrega. |
+| `nodered/` | Fluxos de extração, preparação dos pedidos, validação das respostas e armazenamento inicial, se esta pasta fizer parte do repositório. |
+| `database/` | Scripts SQL ou outros ficheiros relacionados com a base de dados, caso existam. |
+| `data/` | Ficheiros de dados utilizados pelo projeto, como CSV e XML, caso estejam incluídos. |
+| `knime/` | Workflows de transformação, integração e Machine Learning, caso estejam incluídos nesta pasta. |
+| `grafana/` | Configurações ou exportações dos dashboards, se disponibilizadas. |
+| `docs/` | Relatório, diagramas e documentação complementar, caso sejam entregues nesta pasta. |
 
-- MongoDB: `localhost:27018` (as portas `27017`/`5432` do host estao ocupadas por
-  servicos MongoDB/PostgreSQL nativos instalados no Windows; os contentores
-  publicam portas alternativas, sem alterar as ligacoes internas).
-- PostgreSQL: `localhost:5433`
-- Node-RED: `http://localhost:1880`
-- Grafana: `http://localhost:3001`
+Os nomes apresentados são indicativos. Devem ser ajustados à estrutura real do repositório, removendo as entradas que não correspondam a ficheiros efetivamente entregues.
 
-Comando para iniciar:
+Os dados originais podem estar armazenados no MongoDB ou em ficheiros externos, dependendo da fonte. A disponibilidade desses dados para reprodução depende de os mesmos estarem incluídos na entrega ou poderem ser novamente obtidos a partir das fontes públicas.
 
-```powershell
+## 6. Como executar a solução
+
+### 6.1. Pré-requisitos
+
+Instalar ou disponibilizar:
+
+- Docker Desktop com Docker Compose.
+- Node-RED.
+- KNIME Analytics Platform.
+- MongoDB e MongoDB Compass.
+- PostgreSQL.
+- Grafana.
+
+Alguns destes serviços podem estar incluídos no ambiente Docker Compose. Deve confirmar-se a configuração efetiva do projeto antes de iniciar os serviços.
+
+### 6.2. Iniciar os serviços
+
+Abrir um terminal na pasta onde se encontra o ficheiro `docker-compose.yml` ou `compose.yaml`.
+
+Executar:
+
+```bash
 docker compose up -d
 ```
+
+Verificar o estado dos serviços:
+
+```bash
+docker compose ps
+```
+
+Consultar os logs:
+
+```bash
+docker compose logs
+```
+
+Para acompanhar os logs em tempo real:
+
+```bash
+docker compose logs -f
+```
+
+### 6.3. Executar a extração no Node-RED
+
+1. Abrir a interface Node-RED no endereço configurado no ambiente.
+2. Confirmar as configurações dos fluxos e as ligações ao MongoDB.
+3. Selecionar o fluxo pretendido.
+4. Acionar o nó de disparo manual.
+5. Verificar os resultados no painel Debug.
+6. Confirmar os documentos armazenados no MongoDB ou os ficheiros produzidos, conforme a fonte.
+
+Os fluxos de extração são iniciados manualmente na implementação atual.
+
+### 6.4. Executar os workflows no KNIME
+
+1. Abrir o KNIME Analytics Platform.
+2. Importar ou abrir os workflows entregues.
+3. Confirmar os caminhos dos ficheiros CSV e XML.
+4. Verificar as ligações ao MongoDB e ao PostgreSQL.
+5. Executar os nós do workflow de acordo com a sequência definida.
+6. Confirmar os resultados das operações de limpeza, normalização, validação, junção e agregação.
+7. Executar o workflow de Machine Learning, caso se pretenda reproduzir essa componente.
+
+Os caminhos, as credenciais e as ligações podem necessitar de adaptação ao computador de destino.
+
+### 6.5. Verificar os dados no PostgreSQL
+
+Depois de executar o carregamento no KNIME, abrir uma ferramenta de consulta SQL, como o pgAdmin ou o SQL client utilizado no projeto.
+
+Para verificar o número de registos:
+
+```sql
+SELECT COUNT(*) AS total_registos
+FROM public.flight_daily_airline;
+```
+
+Para consultar uma amostra:
+
+```sql
+SELECT *
+FROM public.flight_daily_airline
+LIMIT 20;
+```
+
+Estas consultas pressupõem que a tabela `public.flight_daily_airline` existe na base de dados utilizada. Se o nome efetivo for diferente, deve ser ajustado.
+
+### 6.6. Consultar o Grafana
+
+1. Abrir o Grafana no endereço configurado.
+2. Confirmar que a fonte de dados PostgreSQL está operacional.
+3. Abrir os dashboards disponibilizados.
+4. Verificar se os gráficos e indicadores apresentam dados.
+
+## 7. Execução e limitações
+
+A extração dos dados é iniciada no Node-RED a partir dos ficheiros disponibilizados pelas entidades. Os workflows KNIME são utilizados para executar as transformações e o carregamento dos resultados.
+
+A reprodução integral do projeto depende da disponibilidade dos ficheiros necessários, dos serviços configurados, das ligações às bases de dados e dos caminhos definidos nos workflows.
+
+A componente de Machine Learning tem caráter experimental, pelo que os resultados devem ser interpretados considerando as métricas de avaliação e as limitações dos dados utilizados.
+
+Link para o vídeo de demonstração: https://www.youtube.com/watch?v=5UTS9J_oeKo&t=52s
+
+## 8. Documentação técnica
+
+- Node-RED: https://nodered.org/docs/
+- MongoDB: https://www.mongodb.com/docs/
+- KNIME: https://docs.knime.com/
+- PostgreSQL: https://www.postgresql.org/docs/
+- Grafana: https://grafana.com/docs/
+- Docker Compose: https://docs.docker.com/compose/
+
+---
+
+**Instituto Politécnico do Cávado e do Ave (IPCA)**  
+Licenciatura em Engenharia de Sistemas Informáticos  
+Unidade Curricular de Integração de Sistemas de Informação
