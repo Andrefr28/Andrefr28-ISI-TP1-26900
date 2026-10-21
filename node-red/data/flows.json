@@ -112,7 +112,7 @@
         "proxy": "",
         "authType": "",
         "x": 440,
-        "y": 200,
+        "y": 280,
         "wires": [
             [
                 "f1a0000000000017"
@@ -130,8 +130,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 660,
-        "y": 200,
+        "x": 640,
+        "y": 340,
         "wires": [
             [
                 "f1a0000000000018"
@@ -149,8 +149,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 860,
-        "y": 200,
+        "x": 830,
+        "y": 400,
         "wires": [
             [
                 "f1a0000000000019"
@@ -170,7 +170,7 @@
         "handleDocId": false,
         "name": "updateOne -> weather_raw_original",
         "x": 1060,
-        "y": 200,
+        "y": 440,
         "wires": [
             [
                 "f1a000000000001a"
@@ -190,8 +190,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1280,
-        "y": 200,
+        "x": 1190,
+        "y": 500,
         "wires": []
     },
     {
@@ -206,8 +206,8 @@
             "f1a0000000000019"
         ],
         "uncaught": false,
-        "x": 360,
-        "y": 620,
+        "x": 330,
+        "y": 580,
         "wires": [
             [
                 "f1a000000000001d"
@@ -312,6 +312,7 @@
         "name": "Preparar recolha (voos)",
         "func": "// Prepara o pedido ao BTS (SEM apagar dados).\n// O BTS pode demorar > 2 min a enviar os ~26 MB; o http request tem timeout\n// por omissao de 120 s, pelo que se sobe aqui o limite para 10 min.\n// O BTS aborta pedidos sem User-Agent de browser -> enviamos headers realistas.\nmsg.extraction_id = \"bts_2025_1_ATL\";\nmsg.batch_ts = new Date().toISOString();\nmsg.requestTimeout = 600000;\nmsg.headers = {\n    \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36\",\n    \"Accept\": \"*/*\"\n};\nreturn msg;\n",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",

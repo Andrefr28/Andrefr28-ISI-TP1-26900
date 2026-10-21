@@ -61,7 +61,7 @@
             <entry key="index" type="xint" value="1"/>
             <entry key="port_spec_class" type="xstring" value="org.knime.mongodb2.connection.port.MongoDBConnectionPortObjectSpec"/>
             <entry key="port_object_class" type="xstring" value="org.knime.mongodb2.connection.port.MongoDBConnectionPortObject"/>
-            <entry key="port_object_summary" type="xstring" value="UID:9d6edc94-ebbb-417a-bb74-34315474d02f"/>
+            <entry key="port_object_summary" type="xstring" value="UID:f5916d0f-a270-410e-9f1e-44b15fa44e88"/>
             <entry key="port_spec_location" type="xstring" value="spec/spec.zip"/>
             <entry key="port_object_location" type="xstring" value="object/portobject.zip"/>
             <entry key="port_dir_location" type="xstring" value="port_1"/>
@@ -69,6 +69,6 @@
     </config>
     <config key="filestores">
         <entry key="file_store_location" type="xstring" isnull="true" value=""/>
-        <entry key="file_store_id" type="xstring" value="fb3bcaa2-7acf-4137-aae2-4492b77c3c95"/>
+        <entry key="file_store_id" type="xstring" value="1b9f38eb-24f2-4ab5-a8e6-6df146b04c84"/>
     </config>
 </config>
