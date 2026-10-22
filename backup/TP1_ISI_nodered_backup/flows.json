@@ -65,13 +65,13 @@
             }
         ],
         "repeat": "",
-        "crontab": "",
+        "crontab": "00 01 * * 0",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 120,
+        "x": 130,
         "y": 160,
         "wires": [
             [
@@ -86,6 +86,7 @@
         "name": "Preparar recolha (ATL)",
         "func": "// Passo de preparacao (idempotencia SEM apagar dados):\n// identifica a recolha com uma chave natural e um marcador unico de execucao.\n// A limpeza das recolhas antigas acontece SO no fim, depois de confirmar\n// que os novos dados foram guardados.\nmsg.extraction_id = \"open_meteo_ATL_2025-01\";\nmsg.batch_ts = new Date().toISOString();\nmsg.meta = {\n    source: \"open_meteo\",\n    airport_code: \"ATL\",\n    period: { start: \"2025-01-01\", end: \"2025-01-31\" },\n    format: \"json\",\n    endpoint: \"https://archive-api.open-meteo.com/v1/archive\",\n    extracted_at: msg.batch_ts\n};\nreturn msg;\n",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
@@ -110,9 +111,12 @@
         "tls": "",
         "persist": false,
         "proxy": "",
+        "insecureHTTPParser": false,
         "authType": "",
+        "senderr": false,
+        "headers": [],
         "x": 440,
-        "y": 200,
+        "y": 280,
         "wires": [
             [
                 "f1a0000000000017"
@@ -130,8 +134,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 660,
-        "y": 200,
+        "x": 640,
+        "y": 340,
         "wires": [
             [
                 "f1a0000000000018"
@@ -145,12 +149,13 @@
         "name": "Preparar original (JSON)",
         "func": "// Preserva a resposta original da Open-Meteo, tal como veio, em\n// weather_raw_original. Upsert pela chave natural -> 1 doc por recolha\n// (sem duplicados), registando a 1a e a ultima extracao.\nconst raw = msg.payload;\n\nmsg.payload = [\n    { extraction_id: msg.extraction_id },\n    {\n        $set: {\n            extraction_id: msg.extraction_id,\n            source: \"open_meteo\",\n            airport_code: \"ATL\",\n            period: { start: \"2025-01-01\", end: \"2025-01-31\" },\n            format: \"json\",\n            endpoint: \"https://archive-api.open-meteo.com/v1/archive\",\n            record_count: msg.meta.record_count,\n            last_extracted_at: msg.batch_ts,\n            payload: raw\n        },\n        $setOnInsert: { first_extracted_at: msg.batch_ts }\n    },\n    { upsert: true }\n];\nreturn msg;\n",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 860,
-        "y": 200,
+        "x": 830,
+        "y": 400,
         "wires": [
             [
                 "f1a0000000000019"
@@ -170,7 +175,7 @@
         "handleDocId": false,
         "name": "updateOne -> weather_raw_original",
         "x": 1060,
-        "y": 200,
+        "y": 440,
         "wires": [
             [
                 "f1a000000000001a"
@@ -190,8 +195,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1280,
-        "y": 200,
+        "x": 1190,
+        "y": 500,
         "wires": []
     },
     {
@@ -206,8 +211,8 @@
             "f1a0000000000019"
         ],
         "uncaught": false,
-        "x": 360,
-        "y": 620,
+        "x": 330,
+        "y": 580,
         "wires": [
             [
                 "f1a000000000001d"
@@ -291,13 +296,13 @@
             }
         ],
         "repeat": "",
-        "crontab": "",
+        "crontab": "00 01 * * 0",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 130,
+        "x": 140,
         "y": 160,
         "wires": [
             [
@@ -312,6 +317,7 @@
         "name": "Preparar recolha (voos)",
         "func": "// Prepara o pedido ao BTS (SEM apagar dados).\n// O BTS pode demorar > 2 min a enviar os ~26 MB; o http request tem timeout\n// por omissao de 120 s, pelo que se sobe aqui o limite para 10 min.\n// O BTS aborta pedidos sem User-Agent de browser -> enviamos headers realistas.\nmsg.extraction_id = \"bts_2025_1_ATL\";\nmsg.batch_ts = new Date().toISOString();\nmsg.requestTimeout = 600000;\nmsg.headers = {\n    \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36\",\n    \"Accept\": \"*/*\"\n};\nreturn msg;\n",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
@@ -778,5 +784,14 @@
         "wires": [
             []
         ]
+    },
+    {
+        "id": "14f77ffa70ac12eb",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-contrib-mongodb4": "3.4.0",
+            "node-red-contrib-zip": "1.1.0"
+        }
     }
 ]

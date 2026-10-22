@@ -13,7 +13,7 @@
                     <config key="path">
                         <entry key="location_present" type="xboolean" value="true"/>
                         <entry key="file_system_type" type="xstring" value="LOCAL"/>
-                        <entry key="path" type="xstring" value="C:\Users\j_nun\Desktop\IPCA\IPCA LESI Andre\3Ano\UC_ISI\TP1_ISI\dados\raw\flights.csv"/>
+                        <entry key="path" type="xstring" value="C:\Users\j_nun\Desktop\IPCA\IPCA LESI Andre\3Ano\UC_ISI\TP1_ISI\node-red\data\raw\flights.csv"/>
                     </config>
                     <entry key="includeSubfolders" type="xboolean" value="false"/>
                     <config key="filters">
@@ -130,11 +130,11 @@
                 </config>
             </config>
         </config>
-        <entry key="sourceId_Internals" type="xstring" value="C:\Users\j_nun\Desktop\IPCA\IPCA LESI Andre\3Ano\UC_ISI\TP1_ISI\dados\raw\flights.csv"/>
+        <entry key="sourceId_Internals" type="xstring" value="C:\Users\j_nun\Desktop\IPCA\IPCA LESI Andre\3Ano\UC_ISI\TP1_ISI\node-red\data\raw\flights.csv"/>
         <config key="transformationParameters">
             <config key="specs">
                 <config key="0">
-                    <entry key="sourceIdentifier" type="xstring" value="C:\Users\j_nun\Desktop\IPCA\IPCA LESI Andre\3Ano\UC_ISI\TP1_ISI\dados\raw\flights.csv"/>
+                    <entry key="sourceIdentifier" type="xstring" value="C:\Users\j_nun\Desktop\IPCA\IPCA LESI Andre\3Ano\UC_ISI\TP1_ISI\node-red\data\raw\flights.csv"/>
                     <config key="spec">
                         <config key="0">
                             <entry key="name" type="xstring" value="FlightDate"/>
@@ -190,7 +190,7 @@
                     <config key="fsLocation">
                         <entry key="location_present" type="xboolean" value="true"/>
                         <entry key="file_system_type" type="xstring" value="LOCAL"/>
-                        <entry key="path" type="xstring" value="C:\Users\j_nun\Desktop\IPCA\IPCA LESI Andre\3Ano\UC_ISI\TP1_ISI\dados\raw\flights.csv"/>
+                        <entry key="path" type="xstring" value="C:\Users\j_nun\Desktop\IPCA\IPCA LESI Andre\3Ano\UC_ISI\TP1_ISI\node-red\data\raw\flights.csv"/>
                     </config>
                 </config>
             </config>
@@ -538,6 +538,6 @@
     </config>
     <config key="filestores">
         <entry key="file_store_location" type="xstring" isnull="true" value=""/>
-        <entry key="file_store_id" type="xstring" value="40365050-5968-412c-904a-590695d3ef93"/>
+        <entry key="file_store_id" type="xstring" value="b71ad84d-0afa-4cad-909b-9cfdce5cb0a8"/>
     </config>
 </config>

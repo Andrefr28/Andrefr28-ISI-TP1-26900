@@ -16,7 +16,7 @@
             <entry key="5" type="xstring" value="$Airport_IATA$ MATCHES &quot;[A-Z]{3}&quot; =&gt; &quot;Válido&quot;"/>
             <entry key="6" type="xstring" value="TRUE =&gt; &quot;Inválido&quot;"/>
         </config>
-        <entry key="new-column-name" type="xstring" value="prediction"/>
+        <entry key="new-column-name" type="xstring" value="Val_IATA"/>
         <entry key="replace-column-name" type="xstring" value="Airport_Country"/>
         <entry key="append-column" type="xboolean" value="true"/>
         <entry key="disallowLongOutputForCompatibility" type="xboolean" value="false"/>
@@ -48,6 +48,6 @@
     </config>
     <config key="filestores">
         <entry key="file_store_location" type="xstring" isnull="true" value=""/>
-        <entry key="file_store_id" type="xstring" value="4b5b89fe-3bd1-4a6e-9b68-34e6d1ab2924"/>
+        <entry key="file_store_id" type="xstring" value="84a8baf3-b210-46ac-931c-618e0f72adcc"/>
     </config>
 </config>

@@ -102,6 +102,19 @@ Para acompanhar os logs em tempo real:
 docker compose logs -f
 ```
 
+### 6.2.1. Restaurar os dados a partir da pasta `backup`
+
+A pasta `backup/` contém uma cópia das bases de dados e dos dashboards:
+
+| Ficheiro | Conteúdo |
+|---|---|
+| `backup/mongodb.archive` | Base `airport_intelligence` do MongoDB (dados RAW) |
+| `backup/postgres.backup` | Base `airport_intelligence` do PostgreSQL (formato `pg_dump -Fc`) |
+| `backup/Dashboards_Grafana.json` | Dashboard do Grafana (importar em Dashboards > New > Import) |
+| `backup/TP1_ISI_nodered_backup/` | Cópia de segurança dos fluxos do Node-RED |
+
+Depois de `docker compose up -d`, executar com duplo clique `backup/restaurar_backup.bat` (Windows), que restaura o MongoDB e o PostgreSQL. Para gerar um backup novo, executar `backup/fazer_backup.bat`, com os contentores em execução.
+
 ### 6.3. Executar a extração no Node-RED
 
 1. Abrir a interface Node-RED no endereço configurado no ambiente.
@@ -111,7 +124,7 @@ docker compose logs -f
 5. Verificar os resultados no painel Debug.
 6. Confirmar os documentos armazenados no MongoDB ou os ficheiros produzidos, conforme a fonte.
 
-Os fluxos de extração são iniciados manualmente na implementação atual.
+Os fluxos de extração podem ser iniciados manualmente (botão de disparo) ou correm de forma agendada (ver secção 6.7).
 
 ### 6.4. Executar os workflows no KNIME
 
@@ -146,7 +159,26 @@ LIMIT 20;
 
 Estas consultas pressupõem que a tabela `public.flight_daily_airline` existe na base de dados utilizada. Se o nome efetivo for diferente, deve ser ajustado.
 
-### 6.6. Consultar o Grafana
+### 6.6. Validar a carga (SQL)
+
+Executar `database/validacoes.sql` no pgAdmin (base `airport_intelligence`, porta 5433). As consultas são só de leitura e incluem um resumo PASS/FAIL (contagens, nulos, duplicados e valores fora do intervalo).
+
+### 6.7. Execução automática (jobs agendados)
+
+| Hora (domingo) | Job | Ferramenta | Resultado |
+|---|---|---|---|
+| 01:00 | Extração da meteorologia | Node-RED (cron) | `weather_raw_original` no MongoDB |
+| 01:10 | Extração dos aeroportos | Node-RED (cron) | `node-red/data/raw/airports.xml` + metadados no MongoDB |
+| 01:20 | Extração dos voos | Node-RED (cron) | `node-red/data/raw/flights.csv` + `flights_raw` no MongoDB |
+| manual | Transformação e carga | KNIME (*Execute all* no workflow `AIRPORT_CTRL_WF`), depois da extração | tabela `public.flight_daily_airline` |
+
+- Os jobs de extração registam o resultado (sucesso ou erro) na coleção `etl_logs` do MongoDB e usam *upsert*, pelo que repetições não geram duplicados.
+- A carga do KNIME substitui a tabela no PostgreSQL (idempotente).
+- `run_pipeline.bat` e `agendar_tarefa.bat` são uma tentativa opcional de executar o KNIME em modo batch; requerem a extensão *KNIME Batch Executor*, que não foi possível instalar (erro "KNIME Batch Executor is not installed"). Por isso o job do KNIME é executado manualmente.
+- Requisitos da extração agendada: computador ligado e Docker em execução à hora marcada.
+- Limitação: a dependência entre a extração e o KNIME é garantida pelo horário (e por uma verificação da existência do `flights.csv`), não por um orquestrador de eventos.
+
+### 6.8. Consultar o Grafana
 
 1. Abrir o Grafana no endereço configurado.
 2. Confirmar que a fonte de dados PostgreSQL está operacional.
@@ -155,7 +187,7 @@ Estas consultas pressupõem que a tabela `public.flight_daily_airline` existe na
 
 ## 7. Execução e limitações
 
-A extração dos dados é iniciada no Node-RED a partir dos ficheiros disponibilizados pelas entidades. Os workflows KNIME são utilizados para executar as transformações e o carregamento dos resultados.
+A extração dos dados é feita no Node-RED a partir dos ficheiros disponibilizados pelas entidades, de forma manual ou agendada. Os workflows KNIME são utilizados para executar as transformações e o carregamento dos resultados.
 
 A reprodução integral do projeto depende da disponibilidade dos ficheiros necessários, dos serviços configurados, das ligações às bases de dados e dos caminhos definidos nos workflows.
 

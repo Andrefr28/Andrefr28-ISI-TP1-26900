@@ -1,0 +1,9 @@
+[22/10/2026 19:30:00,75] ===== INICIO job transformacao/carga ===== 
+CompileCommand: exclude org/eclipse/jdt/internal/core/dom/rewrite/ASTRewriteAnalyzer.getExtendedRange bool exclude = true
+^C[22/10/2026 19:34:04,23] ===== INICIO job transformacao/carga ===== 
+CompileCommand: exclude org/eclipse/jdt/internal/core/dom/rewrite/ASTRewriteAnalyzer.getExtendedRange bool exclude = true
+[22/10/2026 19:34:33,17] ERRO KNIME (codigo 5). Ultimas linhas do registo do KNIME: 
+^C[22/10/2026 19:41:17,93] ===== INICIO job transformacao/carga ===== 
+[22/10/2026 19:41:18,52] ERRO: o KNIME esta aberto. Fechar o KNIME por completo e voltar a executar. 
+[22/10/2026 19:41:35,71] ===== INICIO job transformacao/carga ===== 
+[22/10/2026 19:41:36,21] ERRO: o KNIME esta aberto. Fechar o KNIME por completo e voltar a executar. 

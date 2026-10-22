@@ -30,40 +30,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
@@ -88,31 +55,29 @@
         "x": 0,
         "y": 0
       },
-      "id": 5,
+      "id": 6,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
       },
       "pluginVersion": "11.5.2",
       "targets": [
         {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "eg1jk54qzg074b"
-          },
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\r\n    \"FlightDate\" AS \"time\",\r\n    ROUND(\r\n        AVG(\"Mean(DepDelayMinutes)\")::numeric,\r\n        2\r\n    ) AS \"Atraso médio (min)\"\r\nFROM public.flight_daily_airline\r\nGROUP BY \"FlightDate\"\r\nORDER BY \"FlightDate\";",
+          "rawSql": "SELECT\r\n    \"FlightDate\" AS \"time\",\r\n    ROUND(AVG(\"Mean(DepDelayMinutes)\")::numeric, 2)\r\n        AS \"Atraso médio (min)\",\r\n    ROUND(AVG(\"Mean(Mean(precipitation))\")::numeric, 2)\r\n        AS \"Precipitação média (mm)\",\r\n    ROUND(AVG(\"Mean(Mean(wind_speed_10m))\")::numeric, 2)\r\n        AS \"Velocidade média do vento (km/h)\"\r\nFROM public.flight_daily_airline\r\nGROUP BY \"FlightDate\"\r\nORDER BY \"FlightDate\";",
           "refId": "A",
           "sql": {
             "columns": [
@@ -133,122 +98,8 @@
           }
         }
       ],
-      "title": "Panel Title",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "eg1jk54qzg074b"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "id": 3,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "11.5.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "eg1jk54qzg074b"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT\r\n    \"FlightDate\" AS \"time\",\r\n    ROUND(\r\n        AVG(\"Mean(DepDelayMinutes)\")::numeric,\r\n        2\r\n    ) AS \"Atraso médio (min)\"\r\nFROM public.flight_daily_airline\r\nGROUP BY \"FlightDate\"\r\nORDER BY \"FlightDate\";",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Panel Title",
-      "type": "timeseries"
+      "title": "Meteorologia e atraso médio dos voos",
+      "type": "gauge"
     },
     {
       "datasource": {
@@ -301,8 +152,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
-        "y": 8
+        "x": 12,
+        "y": 0
       },
       "id": 1,
       "options": {
@@ -358,8 +209,122 @@
           }
         }
       ],
-      "title": "Panel Title",
+      "title": "Atraso médio por companhia aérea",
       "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "eg1jk54qzg074b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "eg1jk54qzg074b"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n    \"FlightDate\" AS \"time\",\r\n    ROUND(\r\n        AVG(\"Mean(DepDelayMinutes)\")::numeric,\r\n        2\r\n    ) AS \"Atraso médio (min)\"\r\nFROM public.flight_daily_airline\r\nGROUP BY \"FlightDate\"\r\nORDER BY \"FlightDate\";",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Evolução diária do atraso médio dos voos",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -411,7 +376,7 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 9,
         "x": 12,
         "y": 8
       },
@@ -469,7 +434,7 @@
           }
         }
       ],
-      "title": "Panel Title",
+      "title": "Total de cancelamentos por companhia aérea",
       "type": "barchart"
     },
     {
@@ -500,10 +465,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
-        "w": 10,
-        "x": 6,
-        "y": 16
+        "h": 8,
+        "w": 3,
+        "x": 21,
+        "y": 8
       },
       "id": 2,
       "options": {
@@ -550,7 +515,7 @@
           }
         }
       ],
-      "title": "Panel Title",
+      "title": "Total de voos desviados",
       "type": "stat"
     }
   ],
@@ -562,13 +527,13 @@
     "list": []
   },
   "time": {
-    "from": "2025-01-01T00:00:00.000Z",
-    "to": "2025-01-31T00:00:00.000Z"
+    "from": "2024-12-17T00:00:00.000Z",
+    "to": "2025-02-15T00:00:00.000Z"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Atraso médio por companhia aérea",
   "uid": "dg1jlj0aae7lsc",
-  "version": 7,
+  "version": 14,
   "weekStart": ""
 }

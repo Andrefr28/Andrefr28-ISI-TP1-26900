@@ -178,7 +178,8 @@
         "y": 440,
         "wires": [
             [
-                "f1a000000000001a"
+                "f1a000000000001a",
+                "1add8e68cfd1b3d3"
             ]
         ]
     },
@@ -276,6 +277,44 @@
         "wires": []
     },
     {
+        "id": "1add8e68cfd1b3d3",
+        "type": "function",
+        "z": "f1a0000000000001",
+        "name": "Registar sucesso (etl_logs)",
+        "func": "// Regista a execucao com sucesso em etl_logs (msg nova, sem alterar a original).\nreturn { payload: [{\n    source: \"open_meteo\",\n    flow: \"meteorologia\",\n    status: \"ok\",\n    extraction_id: msg.extraction_id || \"open_meteo_ATL_2025-01\",\n    record_count: (msg.meta && msg.meta.record_count !== undefined) ? msg.meta.record_count : null,\n    at: new Date().toISOString()\n}] };",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 125,
+        "y": 20,
+        "wires": [
+            [
+                "db2b582f593dd17d"
+            ]
+        ]
+    },
+    {
+        "id": "db2b582f593dd17d",
+        "type": "mongodb4",
+        "z": "f1a0000000000001",
+        "clientNode": "f1a0000000000020",
+        "mode": "collection",
+        "collection": "etl_logs",
+        "operation": "insertOne",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "insertOne -> etl_logs (sucesso)",
+        "x": 425,
+        "y": 20,
+        "wires": [
+            []
+        ]
+    },
+    {
         "id": "f3a0000000000002",
         "type": "comment",
         "z": "f3a0000000000001",
@@ -296,7 +335,7 @@
             }
         ],
         "repeat": "",
-        "crontab": "",
+        "crontab": "20 01 * * 0",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
@@ -521,8 +560,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 135,
-        "y": 471.1999816894531,
+        "x": 1190,
+        "y": 360,
         "wires": [
             [
                 "c4361cdebb331f94"
@@ -540,8 +579,8 @@
         "createDir": true,
         "overwriteFile": "true",
         "encoding": "utf8",
-        "x": 375,
-        "y": 471.1999816894531,
+        "x": 1370,
+        "y": 260,
         "wires": [
             []
         ]
@@ -558,8 +597,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 125,
-        "y": 551.1999816894531,
+        "x": 1440,
+        "y": 500,
         "wires": [
             [
                 "c3015831a3d7d2c9"
@@ -578,8 +617,8 @@
         "maxTimeMS": "0",
         "handleDocId": false,
         "name": "insertOne -> etl_logs (sucesso)",
-        "x": 425,
-        "y": 551.1999816894531,
+        "x": 1610,
+        "y": 400,
         "wires": [
             []
         ]
@@ -605,13 +644,13 @@
             }
         ],
         "repeat": "",
-        "crontab": "",
+        "crontab": "10 01 * * 0",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 130,
+        "x": 140,
         "y": 160,
         "wires": [
             [
