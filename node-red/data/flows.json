@@ -65,13 +65,13 @@
             }
         ],
         "repeat": "",
-        "crontab": "",
+        "crontab": "00 01 * * 0",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 120,
+        "x": 130,
         "y": 160,
         "wires": [
             [
@@ -86,6 +86,7 @@
         "name": "Preparar recolha (ATL)",
         "func": "// Passo de preparacao (idempotencia SEM apagar dados):\n// identifica a recolha com uma chave natural e um marcador unico de execucao.\n// A limpeza das recolhas antigas acontece SO no fim, depois de confirmar\n// que os novos dados foram guardados.\nmsg.extraction_id = \"open_meteo_ATL_2025-01\";\nmsg.batch_ts = new Date().toISOString();\nmsg.meta = {\n    source: \"open_meteo\",\n    airport_code: \"ATL\",\n    period: { start: \"2025-01-01\", end: \"2025-01-31\" },\n    format: \"json\",\n    endpoint: \"https://archive-api.open-meteo.com/v1/archive\",\n    extracted_at: msg.batch_ts\n};\nreturn msg;\n",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
@@ -110,7 +111,10 @@
         "tls": "",
         "persist": false,
         "proxy": "",
+        "insecureHTTPParser": false,
         "authType": "",
+        "senderr": false,
+        "headers": [],
         "x": 440,
         "y": 280,
         "wires": [
@@ -145,6 +149,7 @@
         "name": "Preparar original (JSON)",
         "func": "// Preserva a resposta original da Open-Meteo, tal como veio, em\n// weather_raw_original. Upsert pela chave natural -> 1 doc por recolha\n// (sem duplicados), registando a 1a e a ultima extracao.\nconst raw = msg.payload;\n\nmsg.payload = [\n    { extraction_id: msg.extraction_id },\n    {\n        $set: {\n            extraction_id: msg.extraction_id,\n            source: \"open_meteo\",\n            airport_code: \"ATL\",\n            period: { start: \"2025-01-01\", end: \"2025-01-31\" },\n            format: \"json\",\n            endpoint: \"https://archive-api.open-meteo.com/v1/archive\",\n            record_count: msg.meta.record_count,\n            last_extracted_at: msg.batch_ts,\n            payload: raw\n        },\n        $setOnInsert: { first_extracted_at: msg.batch_ts }\n    },\n    { upsert: true }\n];\nreturn msg;\n",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
@@ -400,7 +405,8 @@
         "y": 520,
         "wires": [
             [
-                "f3a0000000000013"
+                "f3a0000000000013",
+                "fd4460bc9891771a"
             ]
         ]
     },
@@ -420,7 +426,8 @@
         "y": 580,
         "wires": [
             [
-                "f3a0000000000014"
+                "f3a0000000000014",
+                "456d600bb7703e0f"
             ]
         ]
     },
@@ -500,6 +507,81 @@
             [
                 "f3a0000000000011"
             ]
+        ]
+    },
+    {
+        "id": "fd4460bc9891771a",
+        "type": "function",
+        "z": "f3a0000000000001",
+        "name": "CSV -> ficheiro (para o KNIME)",
+        "func": "// Escreve o CSV filtrado (ATL, jan/2025) em disco para o KNIME o ler.\n// /data/raw (contentor) = node-red/data/raw (no PC). Cria uma msg NOVA:\n// nao altera a msg que segue para o MongoDB.\nlet csv;\ntry { csv = msg.payload[1].$set.csv; } catch (e) { csv = null; }\nif (!csv) { node.error(\"CSV nao encontrado na mensagem\", msg); return null; }\nreturn { payload: csv, extraction_id: msg.extraction_id };",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 135,
+        "y": 471.1999816894531,
+        "wires": [
+            [
+                "c4361cdebb331f94"
+            ]
+        ]
+    },
+    {
+        "id": "c4361cdebb331f94",
+        "type": "file",
+        "z": "f3a0000000000001",
+        "name": "Guardar CSV (flights.csv)",
+        "filename": "/data/raw/flights.csv",
+        "filenameType": "str",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "utf8",
+        "x": 375,
+        "y": 471.1999816894531,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "456d600bb7703e0f",
+        "type": "function",
+        "z": "f3a0000000000001",
+        "name": "Registar sucesso (etl_logs)",
+        "func": "// Regista a execucao com sucesso em etl_logs (msg nova, sem alterar a original).\nreturn { payload: [{\n    source: \"bts_transtats\",\n    flow: \"voos\",\n    status: \"ok\",\n    extraction_id: msg.extraction_id || \"bts_2025_1_ATL\",\n    row_count: (msg.rowCount !== undefined) ? msg.rowCount : null,\n    at: new Date().toISOString()\n}] };",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 125,
+        "y": 551.1999816894531,
+        "wires": [
+            [
+                "c3015831a3d7d2c9"
+            ]
+        ]
+    },
+    {
+        "id": "c3015831a3d7d2c9",
+        "type": "mongodb4",
+        "z": "f3a0000000000001",
+        "clientNode": "f1a0000000000020",
+        "mode": "collection",
+        "collection": "etl_logs",
+        "operation": "insertOne",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "insertOne -> etl_logs (sucesso)",
+        "x": 425,
+        "y": 551.1999816894531,
+        "wires": [
+            []
         ]
     },
     {
@@ -700,7 +782,8 @@
         "y": 360,
         "wires": [
             [
-                "f2a0000000000019"
+                "f2a0000000000019",
+                "0ec9576fe66434db"
             ]
         ]
     },
@@ -776,6 +859,44 @@
         "name": "insertOne -> etl_logs",
         "x": 940,
         "y": 740,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0ec9576fe66434db",
+        "type": "function",
+        "z": "f2a0000000000001",
+        "name": "Registar sucesso (etl_logs)",
+        "func": "// Regista a execucao com sucesso em etl_logs (msg nova, sem alterar a original).\nreturn { payload: [{\n    source: \"ourairports\",\n    flow: \"aeroportos\",\n    status: \"ok\",\n    record_count: (msg.row_count !== undefined) ? msg.row_count : null,\n    xml_bytes: (msg.xml_bytes !== undefined) ? msg.xml_bytes : null,\n    at: new Date().toISOString()\n}] };",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 125,
+        "y": 471.1999816894531,
+        "wires": [
+            [
+                "dddb06f95c5d543d"
+            ]
+        ]
+    },
+    {
+        "id": "dddb06f95c5d543d",
+        "type": "mongodb4",
+        "z": "f2a0000000000001",
+        "clientNode": "f1a0000000000020",
+        "mode": "collection",
+        "collection": "etl_logs",
+        "operation": "insertOne",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "insertOne -> etl_logs (sucesso)",
+        "x": 425,
+        "y": 471.1999816894531,
         "wires": [
             []
         ]

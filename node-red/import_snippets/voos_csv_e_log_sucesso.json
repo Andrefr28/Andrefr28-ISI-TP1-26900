@@ -1,0 +1,73 @@
+[
+  {
+    "id": "snip_v_fn1",
+    "type": "function",
+    "name": "CSV -> ficheiro (para o KNIME)",
+    "func": "// Escreve o CSV filtrado (ATL, jan/2025) em disco para o KNIME o ler.\n// /data/raw (contentor) = node-red/data/raw (no PC). Cria uma msg NOVA:\n// nao altera a msg que segue para o MongoDB.\nlet csv;\ntry { csv = msg.payload[1].$set.csv; } catch (e) { csv = null; }\nif (!csv) { node.error(\"CSV nao encontrado na mensagem\", msg); return null; }\nreturn { payload: csv, extraction_id: msg.extraction_id };",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 500,
+    "y": 760,
+    "wires": [
+      [
+        "snip_v_file"
+      ]
+    ]
+  },
+  {
+    "type": "file",
+    "name": "Guardar CSV (flights.csv)",
+    "filename": "/data/raw/flights.csv",
+    "filenameType": "str",
+    "appendNewline": false,
+    "createDir": true,
+    "overwriteFile": "true",
+    "encoding": "utf8",
+    "id": "snip_v_file",
+    "x": 760,
+    "y": 760,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "snip_v_fn2",
+    "type": "function",
+    "name": "Registar sucesso (etl_logs)",
+    "func": "// Regista a execucao com sucesso em etl_logs (msg nova, sem alterar a original).\nreturn { payload: [{\n    source: \"bts_transtats\",\n    flow: \"voos\",\n    status: \"ok\",\n    extraction_id: msg.extraction_id || \"bts_2025_1_ATL\",\n    row_count: (msg.rowCount !== undefined) ? msg.rowCount : null,\n    at: new Date().toISOString()\n}] };",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 500,
+    "y": 840,
+    "wires": [
+      [
+        "snip_v_db"
+      ]
+    ]
+  },
+  {
+    "id": "snip_v_db",
+    "type": "mongodb4",
+    "clientNode": "f1a0000000000020",
+    "mode": "collection",
+    "collection": "etl_logs",
+    "operation": "insertOne",
+    "output": "toArray",
+    "maxTimeMS": "0",
+    "handleDocId": false,
+    "name": "insertOne -> etl_logs (sucesso)",
+    "x": 790,
+    "y": 840,
+    "wires": [
+      []
+    ]
+  }
+]

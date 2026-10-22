@@ -1,0 +1,38 @@
+[
+  {
+    "id": "snip_a_fn",
+    "type": "function",
+    "name": "Registar sucesso (etl_logs)",
+    "func": "// Regista a execucao com sucesso em etl_logs (msg nova, sem alterar a original).\nreturn { payload: [{\n    source: \"ourairports\",\n    flow: \"aeroportos\",\n    status: \"ok\",\n    record_count: (msg.row_count !== undefined) ? msg.row_count : null,\n    xml_bytes: (msg.xml_bytes !== undefined) ? msg.xml_bytes : null,\n    at: new Date().toISOString()\n}] };",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 500,
+    "y": 760,
+    "wires": [
+      [
+        "snip_a_db"
+      ]
+    ]
+  },
+  {
+    "id": "snip_a_db",
+    "type": "mongodb4",
+    "clientNode": "f1a0000000000020",
+    "mode": "collection",
+    "collection": "etl_logs",
+    "operation": "insertOne",
+    "output": "toArray",
+    "maxTimeMS": "0",
+    "handleDocId": false,
+    "name": "insertOne -> etl_logs (sucesso)",
+    "x": 790,
+    "y": 760,
+    "wires": [
+      []
+    ]
+  }
+]
